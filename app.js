@@ -52,7 +52,21 @@ app.get('/digital/:pin/:state', function(req, res){
 
 // Digital read
 app.get('/digital/:pin', function(req, res){
-  res.send('Digital command' + req.params.pin);
+
+  var answer = new Object();
+
+  answer.id = id;
+  answer.name  = name;
+  answer.connected = true;
+
+  gpio.read(parseInt(req.params.pin), function(err, value) {
+    if(err) throw err;
+    answer.return_value = value;
+  });
+
+  // Send answer
+  res.json(answer);
+  
 });
 
 var server = app.listen(80, function() {
