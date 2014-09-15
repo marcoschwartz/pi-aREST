@@ -8,11 +8,9 @@ var app = express();
 var id = 'cQ4eR';
 var name = 'my_pi';
 
-// Answer
-var answer = new Object();
-
 app.get('/id', function(req, res){
   
+  var answer = new Object();
   answer.id = id;
   answer.name  = name;
   answer.connected = true;
@@ -23,6 +21,7 @@ app.get('/id', function(req, res){
 // Mode
 app.get('/mode/:pin/:state', function(req, res){
 
+  var answer = new Object();
   answer.id = id;
   answer.name  = name;
   answer.connected = true;
