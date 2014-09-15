@@ -19,29 +19,6 @@ app.get('/id', function(req, res){
   res.json(answer);
 });
 
-// Mode
-app.get('/mode/:pin/:state', function(req, res){
-
-  // Process command
-  var answer = new Object();
-  answer.id = id;
-  answer.name  = name;
-  answer.connected = true;
-
-  if (req.params.state == 'o') {
-  	gpio.open(req.params.pin, "output");
-  	answer.message = 'Pin ' + req.params.pin + ' set to output.';
-  }
-
-  if (req.params.state == 'i') {
-  	gpio.open(req.params.pin, "input");
-  	answer.message = 'Pin ' + req.params.pin + ' set to input.';
-  }
-  
-  // Send answer
-  res.json(answer);
-});
-
 // Analog
 app.get('/analog/:pin/:state', function(req, res){
   res.send('Analog command' + req.params.pin + req.params.state);
@@ -62,8 +39,12 @@ app.get('/digital/:pin/:state', function(req, res){
 
   answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
 
-  gpio.write(req.params.pin, req.params.state);
-
+  gpio.open(req.params.pin, "output", function(err) {     
+    gpio.write(req.params.pin, req.params.state, function() {  
+      gpio.close(req.params.pin);                   
+    });
+  });
+  
   // Send answer
   res.json(answer);
 });
