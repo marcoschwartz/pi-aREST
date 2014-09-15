@@ -5,8 +5,27 @@ app.get('/id', function(req, res){
   res.send('The board ID');
 });
 
-app.get('/mode/:pin/:command', function(req, res){
-  res.send('Mode selected' + req.params.pin + req.params.command);
+// Mode
+app.get('/mode/:pin/:state', function(req, res){
+  res.send('Mode selected' + req.params.pin + req.params.state);
+});
+
+// Analog
+app.get('/analog/:pin/:state', function(req, res){
+  res.send('Mode selected' + req.params.pin + req.params.state);
+});
+
+app.get('/analog/:pin', function(req, res){
+  res.send('Mode selected' + req.params.pin);
+});
+
+// Digital
+app.get('/digital/:pin/:state', function(req, res){
+  res.send('Mode selected' + req.params.pin + req.params.state);
+});
+
+app.get('/analog/:pin', function(req, res){
+  res.send('Mode selected' + req.params.pin);
 });
 
 var server = app.listen(80, function() {
