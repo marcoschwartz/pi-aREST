@@ -59,14 +59,16 @@ app.get('/digital/:pin', function(req, res){
   answer.name  = name;
   answer.connected = true;
 
-  gpio.read(parseInt(req.params.pin), function(err, value) {
-    if(err) throw err;
-    answer.return_value = value;
+  gpio.open(parseInt(req.params.pin), "input", function(err) {
+    gpio.read(parseInt(req.params.pin), function(err, value) {
+      answer.return_value = value;
+       gpio.close(parseInt(req.params.pin));  
+    });
   });
-
+  
   // Send answer
   res.json(answer);
-  
+
 });
 
 var server = app.listen(80, function() {
