@@ -29,12 +29,16 @@ app.get('/mode/:pin/:state', function(req, res){
   answer.connected = true;
 
   if (req.params.state == 'o') {
-  	gpio.open(req.params.pin, "output");
+  	gpio.open(req.params.pin, "output", function(){
+  		gpio.close(req.params.pin);
+  	});
   	answer.message = 'Pin ' + req.params.pin + ' set to output.';
   }
 
   if (req.params.state == 'i') {
-  	gpio.open(req.params.pin, "input");
+  	gpio.open(req.params.pin, "input", function(){
+  		gpio.close(req.params.pin);
+  	});
   	answer.message = 'Pin ' + req.params.pin + ' set to input.';
   }
   
@@ -53,7 +57,9 @@ app.get('/analog/:pin', function(req, res){
 
 // Digital
 app.get('/digital/:pin/:state', function(req, res){
-  gpio.write(req.params.pin, req.params.state);
+  gpio.write(req.params.pin, req.params.state, function(){
+  		gpio.close(req.params.pin);
+  });
   res.send('Digital command' + req.params.pin + req.params.state);
 });
 
