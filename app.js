@@ -1,8 +1,12 @@
 var express = require('express');
 var app = express();
 
-app.get('/', function(req, res){
-  res.send('Hello World');
+app.get('/id', function(req, res){
+  res.send('The board ID');
+});
+
+app.get('/mode/:pin/:command', function(req, res){
+  res.send('Mode selected' + req.params.pin + req.params.command);
 });
 
 var server = app.listen(80, function() {
