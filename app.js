@@ -22,7 +22,20 @@ app.get('/id', function(req, res){
 
 // Mode
 app.get('/mode/:pin/:state', function(req, res){
-  res.send('Mode selected' + req.params.pin + req.params.state);
+
+  answer.id = id;
+  answer.name  = name;
+  answer.connected = true;
+
+  if (req.params.state == 'o') {
+  	answer.message = 'Pin ' + req.params.pin + ' set to output.';
+  }
+
+  if (req.params.state == 'i') {
+  	answer.message = 'Pin ' + req.params.pin + ' set to input.';
+  }
+  
+  res.json(answer);
 });
 
 // Analog
