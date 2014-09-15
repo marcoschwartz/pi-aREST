@@ -53,8 +53,19 @@ app.get('/analog/:pin', function(req, res){
 
 // Digital
 app.get('/digital/:pin/:state', function(req, res){
+
+  var answer = new Object();
+
+  answer.id = id;
+  answer.name  = name;
+  answer.connected = true;
+
+  answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
+
   gpio.write(req.params.pin, req.params.state);
-  res.send('Digital command' + req.params.pin + req.params.state);
+
+  // Send answer
+  res.json(answer);
 });
 
 app.get('/digital/:pin', function(req, res){
