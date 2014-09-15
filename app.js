@@ -55,6 +55,6 @@ app.get('/digital/:pin', function(req, res){
   res.send('Digital command' + req.params.pin);
 });
 
-var server = app.listen(3000, function() {
+var server = app.listen(80, function() {
     console.log('Listening on port %d', server.address().port);
 });
