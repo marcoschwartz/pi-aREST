@@ -1,5 +1,6 @@
 // Require
 var express = require('express');
+var gpio = require("pi-gpio");
 
 // Create app
 var app = express();
@@ -21,19 +22,23 @@ app.get('/id', function(req, res){
 // Mode
 app.get('/mode/:pin/:state', function(req, res){
 
+  // Process command
   var answer = new Object();
   answer.id = id;
   answer.name  = name;
   answer.connected = true;
 
   if (req.params.state == 'o') {
+  	gpio.open(req.params.pin, "output");
   	answer.message = 'Pin ' + req.params.pin + ' set to output.';
   }
 
   if (req.params.state == 'i') {
+  	gpio.open(req.params.pin, "input");
   	answer.message = 'Pin ' + req.params.pin + ' set to input.';
   }
   
+  // Send answer
   res.json(answer);
 });
 
@@ -48,10 +53,11 @@ app.get('/analog/:pin', function(req, res){
 
 // Digital
 app.get('/digital/:pin/:state', function(req, res){
+  gpio.write(req.params.pin, req.params.state);
   res.send('Digital command' + req.params.pin + req.params.state);
 });
 
-app.get('/analog/:pin', function(req, res){
+app.get('/digital/:pin', function(req, res){
   res.send('Digital command' + req.params.pin);
 });
 
