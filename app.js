@@ -52,23 +52,21 @@ app.get('/digital/:pin/:state', function(req, res){
 
 // Digital read
 app.get('/digital/:pin', function(req, res){
-
-  var answer = new Object();
-
-  answer.id = id;
-  answer.name  = name;
-  answer.connected = true;
-
+  
   gpio.open(parseInt(req.params.pin), "input", function(err) {
     gpio.read(parseInt(req.params.pin), function(err, value) {
+
+      var answer = new Object();
+      answer.id = id;
+      answer.name  = name;
+      answer.connected = true;
       answer.return_value = value;
-       gpio.close(parseInt(req.params.pin));  
+      res.json(answer);
+
+      gpio.close(parseInt(req.params.pin));  
     });
   });
   
-  // Send answer
-  res.json(answer);
-
 });
 
 var server = app.listen(80, function() {
