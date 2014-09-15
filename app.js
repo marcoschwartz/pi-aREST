@@ -9,6 +9,7 @@ var app = express();
 var id = 'cQ4eR';
 var name = 'my_pi';
 
+// Id
 app.get('/id', function(req, res){
   
   var answer = new Object();
@@ -28,7 +29,7 @@ app.get('/analog/:pin', function(req, res){
   res.send('Analog command' + req.params.pin);
 });
 
-// Digital
+// Digital write
 app.get('/digital/:pin/:state', function(req, res){
 
   var answer = new Object();
@@ -39,20 +40,21 @@ app.get('/digital/:pin/:state', function(req, res){
 
   answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
 
-  gpio.open(req.params.pin, "output", function(err) {     
-    gpio.write(req.params.pin, req.params.state, function() {  
-      gpio.close(req.params.pin);                   
+  gpio.open(parseInt(req.params.pin), "output", function(err) {     
+    gpio.write(parseInt(req.params.pin), parseInt(req.params.state), function() {  
+      gpio.close(parseInt(req.params.pin));                   
     });
   });
-  
+
   // Send answer
   res.json(answer);
 });
 
+// Digital read
 app.get('/digital/:pin', function(req, res){
   res.send('Digital command' + req.params.pin);
 });
 
-var server = app.listen(80, function() {
+var server = app.listen(3000, function() {
     console.log('Listening on port %d', server.address().port);
 });
