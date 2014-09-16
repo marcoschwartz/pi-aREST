@@ -34,7 +34,7 @@ app.get('/:variable', function(req, res){
   answer.name  = name;
   answer.connected = true;
 
-  answer.return_value = variables[req.params.variable];
+  answer[req.params.variable] = variables[req.params.variable];
 
   res.json(answer);
 });
