@@ -9,6 +9,11 @@ var app = express();
 var id = 'cQ4eR';
 var name = 'my_pi';
 
+// Variables
+var variables = new Object();
+variables['temperature'] = 24;
+variables['humidity'] = 40;
+
 // Id
 app.get('/id', function(req, res){
   
@@ -20,13 +25,18 @@ app.get('/id', function(req, res){
   res.json(answer);
 });
 
-// Analog
-app.get('/analog/:pin/:state', function(req, res){
-  res.send('Analog command' + req.params.pin + req.params.state);
-});
+// Variables
+app.get('/:variable', function(req, res){
 
-app.get('/analog/:pin', function(req, res){
-  res.send('Analog command' + req.params.pin);
+  var answer = new Object();
+
+  answer.id = id;
+  answer.name  = name;
+  answer.connected = true;
+
+  answer.req.params.variable = variables[req.params.variable];
+
+  res.json(answer);
 });
 
 // Digital write
