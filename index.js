@@ -2,11 +2,10 @@
 var express = require('express');
 var gpio = require("pi-gpio");
 var RaspiCam = require("raspicam");
-var path = require('path');
 
 // Camera object
 var camera = new RaspiCam({mode: "photo",
-  output: "./public/pictures/image.jpg",
+  output: "./pictures/image.jpg",
   encoding: "jpg",
   timeout: 0
 });
@@ -17,7 +16,7 @@ camera.start();
 var app = express();
 
 // Expose pictures dir
-app.use(express.static(path.join(__dirname, 'public')));
+app.use("/pictures", express.static(__dirname + '/pictures'));
 
 // Pi aREST class
 var pi = {
