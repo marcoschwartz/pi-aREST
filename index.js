@@ -8,7 +8,8 @@ var app = express();
 // Pi aREST class
 var pi = {
   id: '001',
-  name: 'my_pi'
+  name: 'my_pi',
+  variables: {}
 }
 
 // Variables
@@ -85,8 +86,15 @@ var server = app.listen(80, function() {
     console.log('Listening on port %d', server.address().port);
 });
 
+// Expose functions
 module.exports = {
   set_id: function(new_id) {
     pi.id = new_id;
+  },
+  set_name: function(new_name) {
+    pi.name = new_name;
+  },
+  variable: function(variable_name,variable_value){
+    pi.variables[variable_name] = variable_value;  
   }
 };
