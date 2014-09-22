@@ -16,7 +16,7 @@ camera.start();
 var app = express();
 
 // Expose pictures dir
-app.use(express.static(__dirname + '/public'));
+app.use(express.static('./public'));
 
 // Pi aREST class
 var pi = {
