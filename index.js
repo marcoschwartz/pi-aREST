@@ -1,6 +1,16 @@
 // Require
 var express = require('express');
 var gpio = require("pi-gpio");
+var RaspiCam = require("raspicam");
+
+// Camera object
+var camera = new RaspiCam({mode: "photo",
+  output: "./photo/image.jpg",
+  encoding: "jpg",
+  timeout: 0
+});
+
+camera.start();
 
 // Create app
 var app = express();
@@ -40,6 +50,15 @@ app.get('/:variable', function(req, res){
   answer[req.params.variable] = variables[req.params.variable];
 
   res.json(answer);
+});
+
+// Camera snapshot
+app.get('/camera/snapshot', function(req, res){
+
+  camera.on("read", function(err, filename){ 
+    res.send("photo image captured with filename: " + filename );
+  });
+
 });
 
 // Digital write
