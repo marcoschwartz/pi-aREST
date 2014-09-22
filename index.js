@@ -62,6 +62,7 @@ app.get('/camera/snapshot', function(req, res){
 
   camera.on("read", function(err, timestamp, filename){
      console.log("Picture recorded");
+     camera.stop();
   });
 
   answer.id = pi.id;
