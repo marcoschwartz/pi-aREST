@@ -10,8 +10,6 @@ var camera = new RaspiCam({mode: "photo",
   timeout: 0
 });
 
-camera.start();
-
 // Create app
 var app = express();
 
@@ -57,6 +55,8 @@ app.get('/:variable', function(req, res){
 
 // Camera snapshot
 app.get('/camera/snapshot', function(req, res){
+
+  camera.start();
 
   camera.on("read", function(err, timestamp, filename){
      res.redirect('/pictures/' + filename);
