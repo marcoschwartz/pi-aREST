@@ -5,9 +5,12 @@ var RaspiCam = require("raspicam");
 
 // Camera object
 var camera = new RaspiCam({mode: "photo",
+  width: 1920,
+  height: 1080,
   output: "./public/pictures/image.jpg",
   encoding: "jpg",
-  timeout: 0
+  timeout: 0,
+  nopreview
 });
 
 // Create app
