@@ -2,6 +2,7 @@
 var express = require('express');
 var gpio = require("pi-gpio");
 var RaspiCam = require("raspicam");
+var path = require('path');
 
 // Camera object
 var camera = new RaspiCam({mode: "photo",
