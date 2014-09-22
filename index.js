@@ -21,7 +21,7 @@ app.get('/id', function(req, res){
   
   var answer = new Object();
   answer.id = pi.id;
-  answer.name  = name;
+  answer.name  = pi.name;
   answer.connected = true;
   
   res.json(answer);
@@ -33,7 +33,7 @@ app.get('/:variable', function(req, res){
   var answer = new Object();
 
   answer.id = pi.id;
-  answer.name  = name;
+  answer.name  = pi.name;
   answer.connected = true;
 
   answer[req.params.variable] = variables[req.params.variable];
@@ -47,7 +47,7 @@ app.get('/digital/:pin/:state', function(req, res){
   var answer = new Object();
 
   answer.id = pi.id;
-  answer.name  = name;
+  answer.name  = pi.name;
   answer.connected = true;
 
   answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
@@ -70,7 +70,7 @@ app.get('/digital/:pin', function(req, res){
 
       var answer = new Object();
       answer.id = pi.id;
-      answer.name  = name;
+      answer.name  = pi.name;
       answer.connected = true;
       answer.return_value = value;
       res.json(answer);
