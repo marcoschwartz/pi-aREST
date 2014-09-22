@@ -5,9 +5,11 @@ var gpio = require("pi-gpio");
 // Create app
 var app = express();
 
-// Parameters
-var id = 'cQ4eR';
-var name = 'my_pi';
+// Pi aREST class
+var pi = {
+  id: '001',
+  name: 'my_pi'
+}
 
 // Variables
 var variables = new Object();
@@ -82,3 +84,9 @@ app.get('/digital/:pin', function(req, res){
 var server = app.listen(80, function() {
     console.log('Listening on port %d', server.address().port);
 });
+
+module.exports = {
+  set_id: function(new_id) {
+    pi.id = new_id;
+  }
+};
