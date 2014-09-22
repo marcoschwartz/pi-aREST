@@ -56,6 +56,8 @@ app.get('/:variable', function(req, res){
 // Camera snapshot
 app.get('/camera/snapshot', function(req, res){
 
+  var answer = new Object();
+
   camera.start();
 
   camera.on("read", function(err, timestamp, filename){
