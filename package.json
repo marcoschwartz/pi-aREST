@@ -1,0 +1,26 @@
+{
+  "name": "pi-arest",
+  "version": "0.1.0",
+  "description": "Implementation of the aREST API for the Raspberry Pi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcoschwartz/pi-aREST"
+  },
+  "keywords": [
+    "Raspberry Pi"
+  ],
+  "author": "Marco Schwartz <marcolivier.schwartz@gmail.com> (http://www.marcoschwartz.com/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marcoschwartz/pi-aREST/issues"
+  },
+  "homepage": "https://github.com/marcoschwartz/pi-aREST",
+  "dependencies": {
+    "express": "",
+    "pi-gpio": ""
+  }
+}
