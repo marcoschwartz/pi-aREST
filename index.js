@@ -56,7 +56,7 @@ app.get('/:variable', function(req, res){
 app.get('/camera/snapshot', function(req, res){
 
   camera.on("read", function(err, filename){ 
-    res.send("photo image captured with filename: " + filename );
+     res.redirect('./' + filename + '.jpg');
   });
 
 });
