@@ -5,7 +5,7 @@ var RaspiCam = require("raspicam");
 
 // Camera object
 var camera = new RaspiCam({mode: "photo",
-  output: "./camera/image.jpg",
+  output: "./pictures/image.jpg",
   encoding: "jpg",
   timeout: 0
 });
@@ -14,6 +14,9 @@ camera.start();
 
 // Create app
 var app = express();
+
+// Expose pictures dir
+app.use(express.static(__dirname + "/pictures"));
 
 // Pi aREST class
 var pi = {
@@ -56,7 +59,7 @@ app.get('/:variable', function(req, res){
 app.get('/camera/snapshot', function(req, res){
 
   camera.on("read", function(err, timestamp, filename){
-     res.redirect('./' + filename + '.jpg');
+     res.redirect('./../pictures' + filename);
   });
 
 });
