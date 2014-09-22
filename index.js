@@ -20,7 +20,7 @@ variables['humidity'] = 40;
 app.get('/id', function(req, res){
   
   var answer = new Object();
-  answer.id = id;
+  answer.id = pi.id;
   answer.name  = name;
   answer.connected = true;
   
@@ -32,7 +32,7 @@ app.get('/:variable', function(req, res){
 
   var answer = new Object();
 
-  answer.id = id;
+  answer.id = pi.id;
   answer.name  = name;
   answer.connected = true;
 
@@ -46,7 +46,7 @@ app.get('/digital/:pin/:state', function(req, res){
 
   var answer = new Object();
 
-  answer.id = id;
+  answer.id = pi.id;
   answer.name  = name;
   answer.connected = true;
 
@@ -69,7 +69,7 @@ app.get('/digital/:pin', function(req, res){
     gpio.read(parseInt(req.params.pin), function(err, value) {
 
       var answer = new Object();
-      answer.id = id;
+      answer.id = pi.id;
       answer.name  = name;
       answer.connected = true;
       answer.return_value = value;
