@@ -9,7 +9,8 @@ var camera = new RaspiCam({mode: "photo",
   height: 1080,
   output: "./public/pictures/image.jpg",
   encoding: "jpg",
-  timeout: 0
+  timeout: 0,
+  n: true
 });
 
 // Create app
