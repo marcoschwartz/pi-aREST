@@ -59,8 +59,14 @@ app.get('/camera/snapshot', function(req, res){
   camera.start();
 
   camera.on("read", function(err, timestamp, filename){
-     res.redirect('/pictures/' + filename);
+     console.log("Picture recorded");
   });
+
+  answer.id = pi.id;
+  answer.name  = pi.name;
+  answer.connected = true;
+  answer.message = 'Picture saved';
+  res.json(answer);
 
 });
 
