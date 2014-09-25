@@ -46,19 +46,10 @@ module.exports = function (app) {
       answer.name  = pi.name;
       answer.connected = true;
 
-      answer[req.params.variable] = variables[req.params.variable];
+      if (answer[req.params.variable]){
+        answer[req.params.variable] = variables[req.params.variable];
+      }
 
-      res.json(answer);
-    });
-
-    // Id
-    app.get('/id', function(req, res){
-      
-      var answer = new Object();
-      answer.id = pi.id;
-      answer.name  = pi.name;
-      answer.connected = true;
-      
       res.json(answer);
     });
 
