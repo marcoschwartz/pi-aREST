@@ -46,8 +46,8 @@ module.exports = function (app) {
       answer.name  = pi.name;
       answer.connected = true;
 
-      if (variables[req.params.variable]){
-        answer[req.params.variable] = variables[req.params.variable];
+      if (pi.variables[req.params.variable]){
+        answer[req.params.variable] = pi.variables[req.params.variable];
       }
 
       res.json(answer);
