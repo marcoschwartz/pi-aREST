@@ -9,7 +9,7 @@ humidity = 40;
 piREST.variable('temperature',temperature);
 piREST.variable('humidity',humidity);
 
-app.get('/', function(req, res){
+piREST.app.get('/', function(req, res){
   
   res.send("Welcome to the home page");
 
