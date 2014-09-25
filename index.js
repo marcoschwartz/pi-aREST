@@ -25,17 +25,6 @@ var variables = new Object();
 // Exports
 module.exports = function (app) {
     
-    // Id
-    app.get('/id', function(req, res){
-      
-      var answer = new Object();
-      answer.id = pi.id;
-      answer.name  = pi.name;
-      answer.connected = true;
-      
-      res.json(answer);
-    });
-
     // All
     app.get('/', function(req, res){
       
@@ -59,6 +48,17 @@ module.exports = function (app) {
 
       answer[req.params.variable] = variables[req.params.variable];
 
+      res.json(answer);
+    });
+
+    // Id
+    app.get('/id', function(req, res){
+      
+      var answer = new Object();
+      answer.id = pi.id;
+      answer.name  = pi.name;
+      answer.connected = true;
+      
       res.json(answer);
     });
 
