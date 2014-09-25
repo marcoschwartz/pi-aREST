@@ -36,6 +36,18 @@ module.exports = function (app) {
       res.json(answer);
     });
 
+    // All
+    app.get('/', function(req, res){
+      
+      var answer = new Object();
+      answer.id = pi.id;
+      answer.name  = pi.name;
+      answer.variables = pi.variables;
+      answer.connected = true;
+      
+      res.json(answer);
+    });
+
     // Variables
     app.get('/:variable', function(req, res){
 
