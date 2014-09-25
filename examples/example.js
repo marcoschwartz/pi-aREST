@@ -1,9 +1,7 @@
 // Start
 var express = require('express');
-var piREST = require('./../index.js')(app);
-
-// Express app
 var app = express();
+var piREST = require('./../index.js')(app);
 
 piREST.set_id('34f5eQ');
 piREST.set_name('my_new_Pi');
