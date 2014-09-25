@@ -113,15 +113,15 @@ module.exports = function (app) {
   });
 };
 
-// Expose functions
-module.exports = {
-  set_id: function(new_id) {
-    pi.id = new_id;
-  },
-  set_name: function(new_name) {
-    pi.name = new_name;
-  },
-  variable: function(variable_name,variable_value){
-    pi.variables[variable_name] = variable_value;  
-  }
-};
+// // Expose functions
+// module.exports = {
+//   set_id: function(new_id) {
+//     pi.id = new_id;
+//   },
+//   set_name: function(new_name) {
+//     pi.name = new_name;
+//   },
+//   variable: function(variable_name,variable_value){
+//     pi.variables[variable_name] = variable_value;  
+//   }
+// };
