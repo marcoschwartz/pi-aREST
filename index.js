@@ -114,6 +114,24 @@ module.exports = function (app) {
   });
 
   return {
+    connect_ws: function(remote_server, port) {
+
+      var ws = new WebSocket(remote_server);
+
+      ws.on('open', function() {
+        console.log('Opened WebSocket connection');
+
+        ws.on('message', function(message) {
+          console.log('Received command: %s', message);
+          request('http://localhost:' + port + '/' + message, function(error, response, body) {
+            console.log('Returned command: %s', body);
+            ws.send(body);
+          });
+        });
+
+      });
+    
+    },
     set_id: function(new_id) {
       pi.id = new_id;
     },

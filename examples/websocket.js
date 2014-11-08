@@ -14,3 +14,6 @@ piREST.variable('humidity',humidity);
 var server = app.listen(80, function() {
     console.log('Listening on port %d', server.address().port);
 });
+
+// Connect to remote
+rest.connect_ws('http://marcolivier-arest-cloud-test.jit.su/', server.address().port);
