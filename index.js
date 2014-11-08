@@ -1,6 +1,7 @@
 // Require
 var gpio = require("pi-gpio");
 var RaspiCam = require("raspicam");
+var WebSocket = require('ws');
 
 // Camera object
 var camera = new RaspiCam({mode: "photo",
