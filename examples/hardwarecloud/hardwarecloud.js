@@ -16,4 +16,4 @@ var server = app.listen(3000, function() {
 });
 
 // Connect to remote
-piREST.connect_ws('ws://marcolivier-arest-cloud-test.jit.su', 3000);
+piREST.connect_ws('ws://marcolivier-arest-cloud-test.jit.su/', 3000);
