@@ -11,9 +11,9 @@ humidity = 40;
 piREST.variable('temperature',temperature);
 piREST.variable('humidity',humidity);
 
-var server = app.listen(80, function() {
-    console.log('Listening on port %d', server.address().port);
+var server = app.listen(3000, function() {
+    console.log('Listening on port %d', 3000);
 });
 
 // Connect to remote
-piREST.connect_ws('http://marcolivier-arest-cloud-test.jit.su/', server.address().port);
+piREST.connect_ws('http://marcolivier-arest-cloud-test.jit.su/', 3000);
