@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/marcoschwartz/pi-aREST",
   "dependencies": {
+    "request": "*",
     "pi-gpio": "",
     "ws": "",
     "raspicam": ""
