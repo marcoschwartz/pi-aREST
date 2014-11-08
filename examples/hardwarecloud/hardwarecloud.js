@@ -11,7 +11,7 @@ humidity = 40;
 piREST.variable('temperature',temperature);
 piREST.variable('humidity',humidity);
 
-var server = app.listen(80, function() {
+var server = app.listen(3000, function() {
     console.log('Listening on port %d', server.address().port);
 });
 
