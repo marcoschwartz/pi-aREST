@@ -2,7 +2,7 @@
 var gpio = require("pi-gpio");
 var RaspiCam = require("raspicam");
 var WebSocket = require('ws');
-var WebSocket = require('request');
+var request = require('request');
 
 // Camera object
 var camera = new RaspiCam({mode: "photo",
@@ -33,6 +33,7 @@ module.exports = function (app) {
       var answer = new Object();
       answer.id = pi.id;
       answer.name  = pi.name;
+      answer.hardware  = "rpi";
       answer.variables = pi.variables;
       answer.connected = true;
       
@@ -46,6 +47,7 @@ module.exports = function (app) {
 
       answer.id = pi.id;
       answer.name  = pi.name;
+      answer.hardware  = "rpi";
       answer.connected = true;
 
       if (pi.variables[req.params.variable]){
@@ -69,6 +71,7 @@ module.exports = function (app) {
 
       answer.id = pi.id;
       answer.name  = pi.name;
+      answer.hardware  = "rpi";
       answer.connected = true;
       answer.message = 'Picture saved';
       res.json(answer);
@@ -82,6 +85,7 @@ module.exports = function (app) {
 
       answer.id = pi.id;
       answer.name  = pi.name;
+      answer.hardware  = "rpi";
       answer.connected = true;
 
       answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
@@ -105,6 +109,7 @@ module.exports = function (app) {
           var answer = new Object();
           answer.id = pi.id;
           answer.name  = pi.name;
+          answer.hardware  = "rpi";
           answer.connected = true;
           answer.return_value = value;
           res.json(answer);
