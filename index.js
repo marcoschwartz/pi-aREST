@@ -62,9 +62,9 @@ module.exports = function (app) {
 
       var answer = new Object();
 
-      camera.start();
+      camera.start({rotation: 180});
 
-      camera.on("read", function(err, timestamp, filename){
+      camera.once("read", function(err, timestamp, filename){
          console.log("Picture recorded");
          camera.stop();
       });
