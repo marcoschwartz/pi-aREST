@@ -1,5 +1,5 @@
 // Require
-var gpio = require("pi-gpio");
+var gpio = require('rpi-gpio');
 var RaspiCam = require("raspicam");
 var WebSocket = require('ws');
 var request = require('request');
@@ -90,11 +90,14 @@ module.exports = function (app) {
 
       answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
 
-      gpio.open(parseInt(req.params.pin), "output", function(err) {     
-        gpio.write(parseInt(req.params.pin), parseInt(req.params.state), function() {  
-          gpio.close(parseInt(req.params.pin));                   
+      gpio.setup(parseInt(req.params.pin), gpio.DIR_OUT, write);
+
+      function write() {
+        gpio.write(parseInt(req.params.pin), parseInt(req.params.state), function(err) {
+          if (err) throw err;
+          console.log('Written to pin');
         });
-      });
+      }
 
       // Send answer
       res.json(answer);
@@ -102,8 +105,10 @@ module.exports = function (app) {
 
     // Digital read
     app.get('/digital/:pin', function(req, res){
-      
-      gpio.open(parseInt(req.params.pin), "input", function(err) {
+
+      gpio.setup(parseInt(req.params.pin), gpio.DIR_IN, readInput);
+
+      function readInput() {
         gpio.read(parseInt(req.params.pin), function(err, value) {
 
           var answer = new Object();
@@ -114,9 +119,9 @@ module.exports = function (app) {
           answer.return_value = value;
           res.json(answer);
 
-          gpio.close(parseInt(req.params.pin));  
+          //console.log('The value is ' + value);
         });
-      });
+      }
   
   });
 
