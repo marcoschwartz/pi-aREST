@@ -38,7 +38,7 @@ module.exports = function (app) {
       var answer = new Object();
       answer.id = pi.id;
       answer.name  = pi.name;
-      answer.hardware  = "rpi";
+      // answer.hardware  = "rpi";
       answer.variables = pi.variables;
       answer.connected = true;
       
@@ -52,7 +52,7 @@ module.exports = function (app) {
 
       answer.id = pi.id;
       answer.name  = pi.name;
-      answer.hardware  = "rpi";
+      // answer.hardware  = "rpi";
       answer.connected = true;
 
       if (pi.variables[req.params.variable]){
@@ -67,19 +67,25 @@ module.exports = function (app) {
 
       var answer = new Object();
 
-      camera.start({rotation: 180});
+      camera.start();
 
-      camera.once("read", function(err, timestamp, filename){
+      camera.on("read", function(err, timestamp, filename){
          console.log("Picture recorded");
          camera.stop();
-      });
-
-      answer.id = pi.id;
+         answer.id = pi.id;
       answer.name  = pi.name;
-      answer.hardware  = "rpi";
+      //answer.hardware  = "rpi";
       answer.connected = true;
       answer.message = 'Picture saved';
       res.json(answer);
+      });
+
+    });
+    
+    // Camera last picture
+    app.get('/camera/last', function(req, res){
+
+      res.sendFile('image.jpg', { root: path.join(__dirname, '/public/pictures') });
 
     });
 
@@ -90,19 +96,16 @@ module.exports = function (app) {
 
       answer.id = pi.id;
       answer.name  = pi.name;
-      answer.hardware  = "rpi";
+      //answer.hardware  = "rpi";
       answer.connected = true;
 
       answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
 
-      gpio.setup(parseInt(req.params.pin), gpio.DIR_OUT, write);
-
-      function write() {
-        gpio.write(parseInt(req.params.pin), parseInt(req.params.state), function(err) {
-          if (err) throw err;
-          console.log('Written to pin');
+      gpio.open(parseInt(req.params.pin), "output", function(err) {     
+        gpio.write(parseInt(req.params.pin), parseInt(req.params.state), function() {  
+          gpio.close(parseInt(req.params.pin));                   
         });
-      }
+      });
 
       // Send answer
       res.json(answer);
@@ -110,23 +113,21 @@ module.exports = function (app) {
 
     // Digital read
     app.get('/digital/:pin', function(req, res){
-
-      gpio.setup(parseInt(req.params.pin), gpio.DIR_IN, readInput);
-
-      function readInput() {
+      
+      gpio.open(parseInt(req.params.pin), "input", function(err) {
         gpio.read(parseInt(req.params.pin), function(err, value) {
 
           var answer = new Object();
           answer.id = pi.id;
           answer.name  = pi.name;
-          answer.hardware  = "rpi";
+          //answer.hardware  = "rpi";
           answer.connected = true;
           answer.return_value = value;
           res.json(answer);
 
-          //console.log('The value is ' + value);
+          gpio.close(parseInt(req.params.pin));  
         });
-      }
+      });
   
   });
 
