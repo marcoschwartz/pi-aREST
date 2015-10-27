@@ -1,6 +1,6 @@
 {
   "name": "pi-arest",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "description": "Implementation of the aREST API for the Raspberry Pi",
   "main": "index.js",
   "scripts": {
@@ -20,8 +20,8 @@
   },
   "homepage": "https://github.com/marcoschwartz/pi-aREST",
   "dependencies": {
-    "request": "*",
-    "pi-gpio": "",
+    "request": "",
+    "rpi-gpio": "",
     "ws": "",
     "raspicam": ""
   }

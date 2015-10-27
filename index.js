@@ -4,15 +4,20 @@ var RaspiCam = require("raspicam");
 var WebSocket = require('ws');
 var request = require('request');
 
-// Camera object
-var camera = new RaspiCam({mode: "photo",
-  width: 1280,
-  height: 720,
-  output: "./public/pictures/image.jpg",
-  encoding: "jpg",
-  timeout: 0,
-  n: true
-});
+// Try to build camera object
+try {
+  var camera = new RaspiCam({mode: "photo",
+    width: 1280,
+    height: 720,
+    output: "./public/pictures/image.jpg",
+    encoding: "jpg",
+    timeout: 0,
+    n: true
+  });
+}
+catch(err) {
+    console.log('Camera module off');
+}
 
 // Pi aREST class
 var pi = {
