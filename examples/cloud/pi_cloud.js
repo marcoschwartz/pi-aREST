@@ -1,5 +1,5 @@
 // Start
-var piREST = require('./../../index.js')(app);
+var piREST = require('./../../index.js');
 
 piREST.set_id('p5dgwt');
 piREST.set_name('dummy');
