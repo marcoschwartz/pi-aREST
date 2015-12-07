@@ -48,18 +48,9 @@ module.exports = function (app) {
     // Variables
     app.get('/:variable', function(req, res){
 
-      var answer = new Object();
-
-      answer.id = pi.id;
-      answer.name  = pi.name;
-      answer.hardware  = "rpi";
-      answer.connected = true;
-
-      if (pi.variables[req.params.variable]){
-        answer[req.params.variable] = pi.variables[req.params.variable];
-      }
-
+      var answer = getVariable(req.params.variable);
       res.json(answer);
+
     });
 
     // Camera snapshot
@@ -140,6 +131,22 @@ module.exports = function (app) {
   });
 
   return {
+    getVariable: function(variable) {
+
+      var answer = new Object();
+
+      answer.id = pi.id;
+      answer.name  = pi.name;
+      answer.hardware  = "rpi";
+      answer.connected = true;
+
+      if (pi.variables[variable]){
+        answer[variable] = pi.variables[variable];
+      }
+
+      return answer;
+
+    },
     connect: function() {
 
       // Connect to MQTT
@@ -161,9 +168,14 @@ module.exports = function (app) {
       client.on('message', function (topic, message) {
 
         // Message is Buffer
-        console.log(message.toString());
+        var incomingMessage = message.toString();
+        console.log(incomingMessage);
+        console.log(incomingMessage.split('/'));
+
+        // Answer
         client.publish(out_topic, 'Hello mqtt');
         client.end();
+
       });
 
     },
