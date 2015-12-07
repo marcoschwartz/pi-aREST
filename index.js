@@ -48,7 +48,7 @@ module.exports = function (app) {
     // Variables
     app.get('/:variable', function(req, res){
 
-      var answer = getVariable(req.params.variable);
+      var answer = pi.getVariable(req.params.variable);
       res.json(answer);
 
     });
@@ -176,7 +176,7 @@ module.exports = function (app) {
         var answer = {};
 
         if (splitMessage.length == 1) {
-          answer = getVariable(splitMessage);
+          answer = pi.getVariable(splitMessage);
         }
 
         // Answer
