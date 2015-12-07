@@ -32,107 +32,103 @@ var variables = new Object();
 // Exports
 module.exports = function (app) {
 
-    if (app !== undefined) {
+    // All
+    app.get('/', function(req, res){
 
-      // All
-      app.get('/', function(req, res){
+      var answer = new Object();
+      answer.id = pi.id;
+      answer.name  = pi.name;
+      answer.hardware  = "rpi";
+      answer.variables = pi.variables;
+      answer.connected = true;
 
-        var answer = new Object();
-        answer.id = pi.id;
-        answer.name  = pi.name;
-        answer.hardware  = "rpi";
-        answer.variables = pi.variables;
-        answer.connected = true;
+      res.json(answer);
+    });
 
-        res.json(answer);
-      });
+    // Variables
+    app.get('/:variable', function(req, res){
 
-      // Variables
-      app.get('/:variable', function(req, res){
-
-        var answer = getVariable(req.params.variable);
-        res.json(answer);
-
-      });
-
-      // Camera snapshot
-      app.get('/camera/snapshot', function(req, res){
-
-        var answer = new Object();
-
-        camera.start({rotation: 180});
-
-        camera.once("read", function(err, timestamp, filename){
-           console.log("Picture recorded");
-           camera.stop();
-        });
-
-        answer.id = pi.id;
-        answer.name  = pi.name;
-        answer.hardware  = "rpi";
-        answer.connected = true;
-        answer.message = 'Picture saved';
-        res.json(answer);
-
-      });
-
-      // Digital write
-      app.get('/digital/:pin/:state', function(req, res){
-
-        var answer = new Object();
-
-        answer.id = pi.id;
-        answer.name  = pi.name;
-        answer.hardware  = "rpi";
-        answer.connected = true;
-
-        answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
-
-        // Determine state
-        var pinState = false;
-        if (parseInt(req.params.state) == 1) {
-          pinState = true;
-        }
-        if (parseInt(req.params.state) == 0) {
-          pinState = false;
-        }
-
-        gpio.setup(parseInt(req.params.pin), gpio.DIR_OUT, function() {
-          gpio.write(parseInt(req.params.pin), pinState, function(err) {
-            if (err) console.log(err);
-            console.log('Written to pin');
-
-            // Send answer
-            res.json(answer);
-
-          });
-        });
-
-      });
-
-      // Digital read
-      app.get('/digital/:pin', function(req, res){
-
-        gpio.setup(parseInt(req.params.pin), gpio.DIR_IN, function() {
-
-          gpio.read(parseInt(req.params.pin), function(err, value) {
-
-            var answer = new Object();
-            answer.id = pi.id;
-            answer.name  = pi.name;
-            answer.hardware  = "rpi";
-            answer.connected = true;
-            answer.return_value = value;
-            res.json(answer);
-
-            //console.log('The value is ' + value);
-          });
-
-        });
+      var answer = getVariable(req.params.variable);
+      res.json(answer);
 
     });
 
-    }
+    // Camera snapshot
+    app.get('/camera/snapshot', function(req, res){
+
+      var answer = new Object();
+
+      camera.start({rotation: 180});
+
+      camera.once("read", function(err, timestamp, filename){
+         console.log("Picture recorded");
+         camera.stop();
+      });
+
+      answer.id = pi.id;
+      answer.name  = pi.name;
+      answer.hardware  = "rpi";
+      answer.connected = true;
+      answer.message = 'Picture saved';
+      res.json(answer);
+
+    });
+
+    // Digital write
+    app.get('/digital/:pin/:state', function(req, res){
+
+      var answer = new Object();
+
+      answer.id = pi.id;
+      answer.name  = pi.name;
+      answer.hardware  = "rpi";
+      answer.connected = true;
+
+      answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
+
+      // Determine state
+      var pinState = false;
+      if (parseInt(req.params.state) == 1) {
+        pinState = true;
+      }
+      if (parseInt(req.params.state) == 0) {
+        pinState = false;
+      }
+
+      gpio.setup(parseInt(req.params.pin), gpio.DIR_OUT, function() {
+        gpio.write(parseInt(req.params.pin), pinState, function(err) {
+          if (err) console.log(err);
+          console.log('Written to pin');
+
+          // Send answer
+          res.json(answer);
+
+        });
+      });
+
+    });
+
+    // Digital read
+    app.get('/digital/:pin', function(req, res){
+
+      gpio.setup(parseInt(req.params.pin), gpio.DIR_IN, function() {
+
+        gpio.read(parseInt(req.params.pin), function(err, value) {
+
+          var answer = new Object();
+          answer.id = pi.id;
+          answer.name  = pi.name;
+          answer.hardware  = "rpi";
+          answer.connected = true;
+          answer.return_value = value;
+          res.json(answer);
+
+          //console.log('The value is ' + value);
+        });
+
+      });
+
+  });
 
   return {
     getVariable: function(variable) {
