@@ -1,7 +1,7 @@
 // Require
 var gpio = require('rpi-gpio');
 var RaspiCam = require("raspicam");
-var WebSocket = require('ws');
+var mqtt = require('mqtt');
 var request = require('request');
 
 // Try to build camera object
@@ -31,17 +31,17 @@ var variables = new Object();
 
 // Exports
 module.exports = function (app) {
-    
+
     // All
     app.get('/', function(req, res){
-      
+
       var answer = new Object();
       answer.id = pi.id;
       answer.name  = pi.name;
       answer.hardware  = "rpi";
       answer.variables = pi.variables;
       answer.connected = true;
-      
+
       res.json(answer);
     });
 
@@ -103,7 +103,7 @@ module.exports = function (app) {
       if (parseInt(req.params.state) == 0) {
         pinState = false;
       }
-      
+
       gpio.setup(parseInt(req.params.pin), gpio.DIR_OUT, function() {
         gpio.write(parseInt(req.params.pin), pinState, function(err) {
           if (err) console.log(err);
@@ -136,27 +136,36 @@ module.exports = function (app) {
         });
 
       });
-  
+
   });
 
   return {
-    connect_ws: function(remote_server, port) {
+    connect: function() {
 
-      var ws = new WebSocket(remote_server);
+      // Connect to MQTT
+      var client  = mqtt.connect({clientId: pi.id, host: '45.55.79.41', port: 1883 });
+      var in_topic = pi.id + '_in';
+      var out_topic = pi.id + '_out';
 
-      ws.on('open', function() {
-        console.log('Opened WebSocket connection');
+      // If connected
+      client.on('connect', function () {
 
-        ws.on('message', function(message) {
-          console.log('Received command: %s', message);
-          request('http://localhost:' + port + '/' + message, function(error, response, body) {
-            console.log('Returned command: %s', body);
-            ws.send(body);
-          });
-        });
+        console.log('Connected to aREST.io');
+
+        // Subscribe
+        client.subscribe(in_topic);
 
       });
-    
+
+      // Handle messages
+      client.on('message', function (topic, message) {
+
+        // Message is Buffer
+        console.log(message.toString());
+        client.publish(out_topic, 'Hello mqtt');
+        client.end();
+      });
+
     },
     set_id: function(new_id) {
       pi.id = new_id;
@@ -165,7 +174,7 @@ module.exports = function (app) {
       pi.name = new_name;
     },
     variable: function(variable_name,variable_value){
-      pi.variables[variable_name] = variable_value;  
+      pi.variables[variable_name] = variable_value;
     }
   };
 };

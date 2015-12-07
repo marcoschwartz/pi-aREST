@@ -22,7 +22,7 @@
   "dependencies": {
     "request": "",
     "rpi-gpio": "",
-    "ws": "",
+    "mqtt": "",
     "raspicam": ""
   }
 }
