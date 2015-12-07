@@ -48,7 +48,18 @@ module.exports = function (app) {
     // Variables
     app.get('/:variable', function(req, res){
 
-      var answer = pi.getVariable(req.params.variable);
+      var variable = req.params.variable;
+      var answer = new Object();
+
+      answer.id = pi.id;
+      answer.name  = pi.name;
+      answer.hardware  = "rpi";
+      answer.connected = true;
+
+      if (pi.variables[variable]){
+        answer[variable] = pi.variables[variable];
+      }
+
       res.json(answer);
 
     });
@@ -153,18 +164,78 @@ module.exports = function (app) {
 
         // Message is Buffer
         var incomingMessage = message.toString();
-        console.log(incomingMessage);
 
         // Process
         splitMessage = incomingMessage.split('/');
         var answer = {};
 
         if (splitMessage.length == 1) {
-          answer = pi.getVariable(splitMessage);
+
+          var answer = new Object();
+
+          answer.id = pi.id;
+          answer.name  = pi.name;
+          answer.hardware  = "rpi";
+          answer.connected = true;
+
+          if (pi.variables[splitMessage[0]]){
+            answer[splitMessage[0]] = pi.variables[splitMessage[0]];
+          }
+
+          client.publish(out_topic, JSON.stringify(answer));
+
         }
 
-        // Answer
-        client.publish(out_topic, answer);
+        if (splitMessage.length == 2) {
+
+          gpio.setup(parseInt(splitMessage[1]), gpio.DIR_IN, function() {
+
+            gpio.read(parseInt(splitMessage[1]), function(err, value) {
+
+              answer.id = pi.id;
+              answer.name  = pi.name;
+              answer.hardware  = "rpi";
+              answer.connected = true;
+              answer.return_value = value;
+
+              client.publish(out_topic, JSON.stringify(answer));
+
+            });
+
+          });
+
+        }
+
+        if (splitMessage.length == 3) {
+
+          answer.id = pi.id;
+          answer.name  = pi.name;
+          answer.hardware  = "rpi";
+          answer.connected = true;
+
+          answer.message = 'Pin ' + splitMessage[1] + ' set to ' + splitMessage[2];
+
+          // Determine state
+          var pinState = false;
+          if (parseInt(splitMessage[2]) == 1) {
+            pinState = true;
+          }
+          if (parseInt(splitMessage[2]) == 0) {
+            pinState = false;
+          }
+
+          gpio.setup(parseInt(splitMessage[1]), gpio.DIR_OUT, function() {
+            gpio.write(parseInt(splitMessage[1]), pinState, function(err) {
+              if (err) console.log(err);
+              //console.log('Written to pin');
+
+              // Send answer
+              client.publish(out_topic, JSON.stringify(answer));
+
+            });
+          });
+
+        }
 
       });
 
@@ -177,22 +248,6 @@ module.exports = function (app) {
     },
     variable: function(variable_name,variable_value){
       pi.variables[variable_name] = variable_value;
-    },
-    getVariable: function(variable) {
-
-      var answer = new Object();
-
-      answer.id = pi.id;
-      answer.name  = pi.name;
-      answer.hardware  = "rpi";
-      answer.connected = true;
-
-      if (pi.variables[variable]){
-        answer[variable] = pi.variables[variable];
-      }
-
-      return answer;
-
     }
   };
 };

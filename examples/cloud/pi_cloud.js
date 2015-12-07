@@ -4,7 +4,7 @@ var app = express();
 var piREST = require('./../../index.js')(app);
 
 piREST.set_id('p5dgwt');
-piREST.set_name('dummy');
+piREST.set_name('pi_cloud');
 
 temperature = 24;
 humidity = 40;
