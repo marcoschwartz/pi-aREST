@@ -131,22 +131,6 @@ module.exports = function (app) {
   });
 
   return {
-    getVariable: function(variable) {
-
-      var answer = new Object();
-
-      answer.id = pi.id;
-      answer.name  = pi.name;
-      answer.hardware  = "rpi";
-      answer.connected = true;
-
-      if (pi.variables[variable]){
-        answer[variable] = pi.variables[variable];
-      }
-
-      return answer;
-
-    },
     connect: function() {
 
       // Connect to MQTT
@@ -193,6 +177,22 @@ module.exports = function (app) {
     },
     variable: function(variable_name,variable_value){
       pi.variables[variable_name] = variable_value;
+    },
+    getVariable: function(variable) {
+
+      var answer = new Object();
+
+      answer.id = pi.id;
+      answer.name  = pi.name;
+      answer.hardware  = "rpi";
+      answer.connected = true;
+
+      if (pi.variables[variable]){
+        answer[variable] = pi.variables[variable];
+      }
+
+      return answer;
+
     }
   };
 };
