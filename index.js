@@ -170,11 +170,17 @@ module.exports = function (app) {
         // Message is Buffer
         var incomingMessage = message.toString();
         console.log(incomingMessage);
-        console.log(incomingMessage.split('/'));
+
+        // Process
+        splitMessage = incomingMessage.split('/');
+        var answer = {};
+
+        if (splitMessage.length == 1) {
+          answer = getVariable(splitMessage);
+        }
 
         // Answer
-        client.publish(out_topic, 'Hello mqtt');
-        client.end();
+        client.publish(out_topic, answer);
 
       });
 
