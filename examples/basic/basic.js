@@ -5,6 +5,7 @@ var piREST = require('./../../index.js')(app);
 
 piREST.set_id('34f5eQ');
 piREST.set_name('my_new_Pi');
+piREST.set_name(MODE_BCM);
 
 temperature = 24;
 humidity = 40;

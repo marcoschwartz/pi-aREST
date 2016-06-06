@@ -243,11 +243,30 @@ module.exports = function (app) {
     set_id: function(new_id) {
       pi.id = new_id;
     },
+    set_mode: function(mode) {
+      gpio.setMode(mode)
+    },
     set_name: function(new_name) {
       pi.name = new_name;
     },
     variable: function(variable_name,variable_value){
       pi.variables[variable_name] = variable_value;
+    },
+    digitalWrite: function(pin, state) {
+
+      // Determine state
+      var pinState = false;
+      if (parseInt(state) == 1) {
+        pinState = true;
+      }
+      if (parseInt(state) == 0) {
+        pinState = false;
+      }
+
+      gpio.setup(parseInt(pin), gpio.DIR_OUT, function() {
+        gpio.write(parseInt(pin), pinState);
+      });
+
     }
   };
 };
