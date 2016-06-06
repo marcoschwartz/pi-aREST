@@ -244,7 +244,13 @@ module.exports = function (app) {
       pi.id = new_id;
     },
     set_mode: function(mode) {
-      gpio.setMode(mode)
+      if (mode == 'bcm') {
+        gpio.setMode(gpio.MODE_BCM);
+      }
+      if (mode == 'rpi') {
+        gpio.setMode(gpio.MODE_RPI);
+      }
+
     },
     set_name: function(new_name) {
       pi.name = new_name;
