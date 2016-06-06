@@ -5,7 +5,7 @@ var piREST = require('./../../index.js')(app);
 
 piREST.set_id('p5dgwt');
 piREST.set_name('pi_cloud');
-piREST.set_mode('bcm');
+piREST.set_mode('rpi');
 
 temperature = 24;
 humidity = 40;
