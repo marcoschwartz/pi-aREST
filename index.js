@@ -142,13 +142,21 @@ module.exports = function (app) {
   });
 
   return {
-    connect: function() {
+    connect: function(host) {
 
       // Generate MQTT clientId
       var clientId = makeId(6) + pi.id;
 
+      // Own server?
+      if (typeof host !== 'undefined') {
+        remoteHost = host;
+      }
+      else {
+        remoteHost = '45.55.79.41';
+      }
+
       // Connect to MQTT
-      var client  = mqtt.connect({clientId: pi.id, host: '45.55.79.41', port: 1883 });
+      var client  = mqtt.connect({clientId: pi.id, host: remoteHost, port: 1883 });
       var in_topic = clientId + '_in';
       var out_topic = clientId + '_out';
 
