@@ -156,7 +156,7 @@ module.exports = function (app) {
       }
 
       // Connect to MQTT
-      var client  = mqtt.connect({clientId: pi.id, host: remoteHost, port: 1883 });
+      var client  = mqtt.connect({clientId: clientId, host: remoteHost, port: 1883 });
       var in_topic = clientId + '_in';
       var out_topic = clientId + '_out';
 
