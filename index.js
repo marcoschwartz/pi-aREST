@@ -289,7 +289,7 @@ module.exports = function (app) {
   };
 };
 
-function makeid(length)
+function makeId(length)
 {
     var text = "";
     var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
