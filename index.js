@@ -144,10 +144,13 @@ module.exports = function (app) {
   return {
     connect: function() {
 
+      // Generate MQTT clientId
+      var clientId = makeId(6) + pi.id;
+
       // Connect to MQTT
       var client  = mqtt.connect({clientId: pi.id, host: '45.55.79.41', port: 1883 });
-      var in_topic = pi.id + '_in';
-      var out_topic = pi.id + '_out';
+      var in_topic = clientId + '_in';
+      var out_topic = clientId + '_out';
 
       // If connected
       client.on('connect', function () {
@@ -244,6 +247,7 @@ module.exports = function (app) {
       pi.id = new_id;
     },
     set_mode: function(mode) {
+
       if (mode == 'bcm') {
         gpio.setMode(gpio.MODE_BCM);
       }
@@ -276,3 +280,14 @@ module.exports = function (app) {
     }
   };
 };
+
+function makeid(length)
+{
+    var text = "";
+    var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i = 0; i < length; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
