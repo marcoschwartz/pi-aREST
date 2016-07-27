@@ -70,7 +70,7 @@ module.exports = function (app) {
         if (req.query.params) {
 
           // Execute function
-          pi.functions[variable](req.params.params, function(result) {
+          pi.functions[variable](req.query.params, function(result) {
             answer.return_value = result;
             res.json(answer);
           });
