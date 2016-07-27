@@ -9,19 +9,14 @@ piREST.set_name('my_new_Pi');
 piREST.set_mode('bcm');
 
 // Function
-function togglePin(callback) {
+function setPin(value, callback) {
 
-  // Get GPIO18 value
-  piREST.digitalRead(18, function(value) {
-
-    // Set GPIO18 on
-    piREST.digitalWrite(18, !value);
-    callback(1);
-
-  });
+  // Set GPIO18
+  piREST.digitalWrite(18, value);
+  callback(1);
 
 }
-piREST.function('toggle', togglePin);
+piREST.function('pin', setPin);
 
 // Variables
 temperature = 24;

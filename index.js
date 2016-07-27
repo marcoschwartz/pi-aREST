@@ -66,11 +66,25 @@ module.exports = function (app) {
       // Function ?
       if (pi.functions[variable]) {
 
-        // Execute function
-        pi.functions[variable](function(result) {
-          answer.return_value = result;
-          res.json(answer);
-        });
+        // Parameters ?
+        if (req.params.params) {
+
+          // Execute function
+          pi.functions[variable](req.params.params, function(result) {
+            answer.return_value = result;
+            res.json(answer);
+          });
+
+        }
+        else {
+
+          // Execute function
+          pi.functions[variable](function(result) {
+            answer.return_value = result;
+            res.json(answer);
+          });
+
+        }
 
       }
 
