@@ -1,6 +1,6 @@
 # pi-aREST
 
-Version 1.2.0
+Version 1.2.3
 
 ## Overview
 
@@ -40,7 +40,7 @@ Once this is done, you can install pi-aREST in your project with:
 4. Get the IP address of your board with `ifconfig`
 4. Go to a web browser and type `rpi_ip_address/digital/7/1` and the LED should turn on
 
-## Cloud Access quick test (Ethernet/WiFi) (BETA)
+## Cloud Access quick test (Ethernet/WiFi)
 
 1. Connect a LED & resistor to pin number 7 of your Raspberry Pi board (GPIO4)
 2. Open the cloud example sketch
@@ -51,7 +51,7 @@ Once this is done, you can install pi-aREST in your project with:
 
 ## API documentation
 
-The API currently supports two type of commands: digital, and variables.
+The API currently supports three type of commands: digital, variables, and functions.
 
 ### Digital
 
@@ -64,9 +64,17 @@ Digital is to write or read on digital pins on the Raspberry Pi. For example:
 
 You can also directly call variables that are defined in your Node.js application.
 
-To access a variable in your sketch, you have to declare it first, and then call it from with a REST call. For example, if your aREST instance is called "piREST" and the variable "temperature":
+To access a variable in your sketch, you have to declare it first, and then call it with a REST call. For example, if your aREST instance is called "piREST" and the variable "temperature":
   * `piREST.variable("temperature",temperature);` declares the temperature in the Node.js application
   * `/temperature` returns the value of the variable in JSON format
+
+### Functions
+
+You can also directly call functions that are defined in your Node.js application.
+
+To access a function in your sketch, you have to declare it first, and then call it with a REST call. For example, if your aREST instance is called "piREST" and the function "motor":
+  * `piREST.function("motor",motor);` declares the function in the Node.js application
+  * `/motor` executes the function
 
 ### Get data about the board
 
