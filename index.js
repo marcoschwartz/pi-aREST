@@ -221,6 +221,7 @@ module.exports = function (app) {
           // Variable ?
           if (pi.variables[splitMessage[0]]){
             answer[splitMessage[0]] = pi.variables[splitMessage[0]];
+            client.publish(out_topic, JSON.stringify(answer));
           }
 
           else {
