@@ -15,6 +15,7 @@ function togglePin() {
   piREST.digitalRead(18, function(value) {
 
     // Set GPIO18 on
+    console.log(value);
     piREST.digitalWrite(18, !value);
     return 1;
 
