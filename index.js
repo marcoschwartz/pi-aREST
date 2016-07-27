@@ -23,7 +23,8 @@ catch(err) {
 var pi = {
   id: '001',
   name: 'my_pi',
-  variables: {}
+  variables: {},
+  functions: {}
 }
 
 // Variables
