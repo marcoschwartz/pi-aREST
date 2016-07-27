@@ -299,7 +299,7 @@ module.exports = function (app) {
       // Determine state
       var pinState = false;
 
-      if(typeof(variable) === "boolean"){
+      if( typeof(state) === "boolean") {
         pinState = state;
       }
       else {
