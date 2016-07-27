@@ -67,7 +67,7 @@ module.exports = function (app) {
       if (pi.functions[variable]) {
 
         // Parameters ?
-        if (req.params.params) {
+        if (req.query.params) {
 
           // Execute function
           pi.functions[variable](req.params.params, function(result) {
