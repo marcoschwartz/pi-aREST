@@ -66,8 +66,7 @@ module.exports = function (app) {
       if (pi.functions[variable]) {
 
         // Execute function
-        var result = pi.functions[variable]();
-        answer['return_value'] = result;
+        answer.return_value = pi.functions[variable]();
 
       }
 
@@ -284,6 +283,17 @@ module.exports = function (app) {
     function: function(function_name, function_definition) {
       pi.functions[function_name] = function_definition;
     },
+    digitalRead: function(pin) {
+      gpio.setup(parseInt(pin), gpio.DIR_IN, function() {
+
+        gpio.read(parseInt(pin), function(err, value) {
+
+          return value;
+
+        });
+
+      });
+    }
     digitalWrite: function(pin, state) {
 
       // Determine state
