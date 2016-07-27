@@ -298,13 +298,22 @@ module.exports = function (app) {
 
       // Determine state
       var pinState = false;
-      if (parseInt(state) == 1) {
-        pinState = true;
+
+      if(typeof(variable) === "boolean"){
+        pinState = state;
       }
-      if (parseInt(state) == 0) {
-        pinState = false;
+      else {
+
+        if (parseInt(state) == 1) {
+          pinState = true;
+        }
+        if (parseInt(state) == 0) {
+          pinState = false;
+        }
+
       }
 
+      // Write
       gpio.setup(parseInt(pin), gpio.DIR_OUT, function() {
         gpio.write(parseInt(pin), pinState);
       });
