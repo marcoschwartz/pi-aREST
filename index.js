@@ -293,7 +293,7 @@ module.exports = function (app) {
         });
 
       });
-    }
+    },
     digitalWrite: function(pin, state) {
 
       // Determine state
