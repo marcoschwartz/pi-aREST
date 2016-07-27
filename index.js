@@ -64,7 +64,7 @@ module.exports = function (app) {
       }
 
       // Function ?
-      if (pi.functions[variable]) {
+      else if (pi.functions[variable]) {
 
         // Parameters ?
         if (req.query.params) {
@@ -86,6 +86,9 @@ module.exports = function (app) {
 
         }
 
+      }
+      else {
+        res.json(answer);
       }
 
     });
@@ -215,11 +218,14 @@ module.exports = function (app) {
           answer.hardware  = "rpi";
           answer.connected = true;
 
+          // Variable ?
           if (pi.variables[splitMessage[0]]){
             answer[splitMessage[0]] = pi.variables[splitMessage[0]];
           }
 
-          client.publish(out_topic, JSON.stringify(answer));
+          else {
+            client.publish(out_topic, JSON.stringify(answer));
+          }
 
         }
 
