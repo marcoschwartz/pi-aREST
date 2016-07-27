@@ -283,12 +283,12 @@ module.exports = function (app) {
     function: function(function_name, function_definition) {
       pi.functions[function_name] = function_definition;
     },
-    digitalRead: function(pin) {
+    digitalRead: function(pin, callback) {
       gpio.setup(parseInt(pin), gpio.DIR_IN, function() {
 
         gpio.read(parseInt(pin), function(err, value) {
 
-          return value;
+          callback(value);
 
         });
 

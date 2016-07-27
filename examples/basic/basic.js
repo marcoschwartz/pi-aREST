@@ -12,12 +12,13 @@ piREST.set_mode('bcm');
 function togglePin() {
 
   // Get GPIO18 value
-  value = piREST.digitalRead(18);
+  piREST.digitalRead(18, function(value) {
 
-  // Set GPIO18 on
-  piREST.digitalWrite(18, !value);
+    // Set GPIO18 on
+    piREST.digitalWrite(18, !value);
+    return 1;
 
-  return 1;
+  });
 
 }
 piREST.function('toggle', togglePin);
