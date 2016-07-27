@@ -66,7 +66,9 @@ module.exports = function (app) {
       if (pi.functions[variable]) {
 
         // Execute function
-        answer.return_value = pi.functions[variable]();
+        pi.functions[variable](function(result) {
+          answer.return_value = result;
+        });
 
       }
 

@@ -9,15 +9,14 @@ piREST.set_name('my_new_Pi');
 piREST.set_mode('bcm');
 
 // Function
-function togglePin() {
+function togglePin(callback) {
 
   // Get GPIO18 value
   piREST.digitalRead(18, function(value) {
 
     // Set GPIO18 on
-    console.log(value);
     piREST.digitalWrite(18, !value);
-    return 1;
+    callback(1);
 
   });
 
