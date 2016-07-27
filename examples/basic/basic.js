@@ -3,10 +3,21 @@ var express = require('express');
 var app = express();
 var piREST = require('./../../index.js')(app);
 
+// ID should be 6 characters long
 piREST.set_id('34f5eQ');
 piREST.set_name('my_new_Pi');
 piREST.set_mode('bcm');
 
+// Function
+function pinOn() {
+
+  // Set GPIO18 on
+  piREST.digitalWrite(18, 1);
+
+}
+piREST.function('on', pinOn);
+
+// Variables
 temperature = 24;
 humidity = 40;
 piREST.variable('temperature',temperature);

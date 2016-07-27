@@ -56,8 +56,18 @@ module.exports = function (app) {
       answer.hardware  = "rpi";
       answer.connected = true;
 
+      // Variable ?
       if (pi.variables[variable]){
         answer[variable] = pi.variables[variable];
+      }
+
+      // Function ?
+      if (pi.functions[variable]) {
+
+        // Execute function
+        var result = pi.functions[variable]();
+        answer['return_value'] = result;
+
       }
 
       res.json(answer);
@@ -267,8 +277,11 @@ module.exports = function (app) {
     set_name: function(new_name) {
       pi.name = new_name;
     },
-    variable: function(variable_name,variable_value){
+    variable: function(variable_name, variable_value){
       pi.variables[variable_name] = variable_value;
+    },
+    function: function(function_name, function_definition) {
+      pi.functions[function_name] = function_definition;
     },
     digitalWrite: function(pin, state) {
 
