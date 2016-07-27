@@ -60,6 +60,7 @@ module.exports = function (app) {
       // Variable ?
       if (pi.variables[variable]){
         answer[variable] = pi.variables[variable];
+        res.json(answer);
       }
 
       // Function ?
@@ -68,11 +69,10 @@ module.exports = function (app) {
         // Execute function
         pi.functions[variable](function(result) {
           answer.return_value = result;
+          res.json(answer);
         });
 
       }
-
-      res.json(answer);
 
     });
 
