@@ -1,6 +1,5 @@
 // Require
 var rpio = require('rpio');
-var gpio = require('rpi-gpio')
 var RaspiCam = require("raspicam");
 var mqtt = require('mqtt');
 var request = require('request');
@@ -250,8 +249,8 @@ module.exports = function (app) {
         if (splitMessage.length == 2) {
 
           // Read
-          rpio.open(parseInt(req.params.pin), rpio.INPUT);
-          value = rpio.read(parseInt(req.params.pin));
+          rpio.open(parseInt(splitMessage[1]), rpio.INPUT);
+          value = rpio.read(parseInt(splitMessage[1]));
 
           answer.id = pi.id;
           answer.name  = pi.name;
@@ -281,10 +280,10 @@ module.exports = function (app) {
 
           // Determine state
           if (parseInt(splitMessage[2]) == 1) {
-            rpio.write(parseInt(req.params.pin), rpio.HIGH);
+            rpio.write(parseInt(splitMessage[1]), rpio.HIGH);
           }
           if (parseInt(splitMessage[2]) == 0) {
-            rpio.write(parseInt(req.params.pin), rpio.LOW);
+            rpio.write(parseInt(splitMessage[1]), rpio.LOW);
           }
 
           // Send answer
