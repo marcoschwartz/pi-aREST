@@ -1,6 +1,6 @@
 // Require
-var gpio = require('rpi-gpio');
 var rpio = require('rpio');
+var gpio = require('rpi-gpio')
 var RaspiCam = require("raspicam");
 var mqtt = require('mqtt');
 var request = require('request');
@@ -120,10 +120,11 @@ module.exports = function (app) {
 
       if (req.params.command == 'digital') {
 
+        // Read
         rpio.open(parseInt(req.params.pin), rpio.INPUT);
         value = rpio.read(parseInt(req.params.pin));
-        console.log('Pin 11 is currently set ' + value);
 
+        // Send answer
         var answer = new Object();
         answer.id = pi.id;
         answer.name  = pi.name;
@@ -159,25 +160,27 @@ module.exports = function (app) {
 
       answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
 
-      // Determine state
-      var pinState = false;
+      // Open for write
+      rpio.open(parseInt(req.params.pin), rpio.OUTPUT, rpio.LOW);
+
+      // Determine state & write
       if (parseInt(req.params.state) == 1) {
-        pinState = true;
+        rpio.write(parseInt(req.params.pin), rpio.HIGH);
       }
       if (parseInt(req.params.state) == 0) {
-        pinState = false;
+        rpio.write(parseInt(req.params.pin), rpio.LOW);
       }
 
-      gpio.setup(parseInt(req.params.pin), gpio.DIR_OUT, function() {
-        gpio.write(parseInt(req.params.pin), pinState, function(err) {
-          if (err) console.log(err);
-          console.log('Written to pin');
-
-          // Send answer
-          res.json(answer);
-
-        });
-      });
+      // gpio.setup(parseInt(req.params.pin), gpio.DIR_OUT, function() {
+      //   gpio.write(parseInt(req.params.pin), pinState, function(err) {
+      //     if (err) console.log(err);
+      //     console.log('Written to pin');
+      //
+      //     // Send answer
+      //     res.json(answer);
+      //
+      //   });
+      // });
 
     });
 
@@ -300,11 +303,17 @@ module.exports = function (app) {
     },
     set_mode: function(mode) {
 
+      if (mode == 'gpio') {
+        rpio.init({mapping: 'gpio'});
+      }
       if (mode == 'bcm') {
-        gpio.setMode(gpio.MODE_BCM);
+        rpio.init({mapping: 'gpio'});
       }
       if (mode == 'rpi') {
-        gpio.setMode(gpio.MODE_RPI);
+        rpio.init({mapping: 'physical'});
+      }
+      if (mode == 'physical') {
+        rpio.init({mapping: 'physical'});
       }
 
     },
