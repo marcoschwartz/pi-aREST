@@ -114,6 +114,32 @@ module.exports = function (app) {
 
     });
 
+    // Digital read
+    app.get('/:command/:pin', function(req, res){
+
+      if (req.params.command == 'digital') {
+
+        gpio.setup(parseInt(req.params.pin), gpio.DIR_IN, function() {
+
+          gpio.read(parseInt(req.params.pin), function(err, value) {
+
+            var answer = new Object();
+            answer.id = pi.id;
+            answer.name  = pi.name;
+            answer.hardware  = "rpi";
+            answer.connected = true;
+            answer.return_value = value;
+            res.json(answer);
+
+            //console.log('The value is ' + value);
+          });
+
+        });
+
+      }
+
+  });
+
     // Digital write
     app.get('/digital/:pin/:state', function(req, res){
 
@@ -147,28 +173,6 @@ module.exports = function (app) {
       });
 
     });
-
-    // Digital read
-    app.get('/digital/:pin', function(req, res){
-
-      gpio.setup(parseInt(req.params.pin), gpio.DIR_IN, function() {
-
-        gpio.read(parseInt(req.params.pin), function(err, value) {
-
-          var answer = new Object();
-          answer.id = pi.id;
-          answer.name  = pi.name;
-          answer.hardware  = "rpi";
-          answer.connected = true;
-          answer.return_value = value;
-          res.json(answer);
-
-          //console.log('The value is ' + value);
-        });
-
-      });
-
-  });
 
   return {
     connect: function(host) {
