@@ -171,6 +171,9 @@ module.exports = function (app) {
         rpio.write(parseInt(req.params.pin), rpio.LOW);
       }
 
+      // Send answer
+     res.json(answer);
+
       // gpio.setup(parseInt(req.params.pin), gpio.DIR_OUT, function() {
       //   gpio.write(parseInt(req.params.pin), pinState, function(err) {
       //     if (err) console.log(err);
@@ -246,21 +249,21 @@ module.exports = function (app) {
 
         if (splitMessage.length == 2) {
 
-          gpio.setup(parseInt(splitMessage[1]), gpio.DIR_IN, function() {
+          // Read
+          rpio.open(parseInt(req.params.pin), rpio.INPUT);
+          value = rpio.read(parseInt(req.params.pin));
 
-            gpio.read(parseInt(splitMessage[1]), function(err, value) {
+          answer.id = pi.id;
+          answer.name  = pi.name;
+          answer.hardware  = "rpi";
+          answer.connected = true;
+          answer.return_value = value;
 
-              answer.id = pi.id;
-              answer.name  = pi.name;
-              answer.hardware  = "rpi";
-              answer.connected = true;
-              answer.return_value = value;
-
-              client.publish(out_topic, JSON.stringify(answer));
-
-            });
-
-          });
+          client.publish(out_topic, JSON.stringify(answer));
+          //
+          //   });
+          //
+          // });
 
         }
 
@@ -273,25 +276,29 @@ module.exports = function (app) {
 
           answer.message = 'Pin ' + splitMessage[1] + ' set to ' + splitMessage[2];
 
+          // Open for write
+          rpio.open(parseInt(req.params.pin), rpio.OUTPUT, rpio.LOW);
+
           // Determine state
-          var pinState = false;
           if (parseInt(splitMessage[2]) == 1) {
-            pinState = true;
+            rpio.write(parseInt(req.params.pin), rpio.HIGH);
           }
           if (parseInt(splitMessage[2]) == 0) {
-            pinState = false;
+            rpio.write(parseInt(req.params.pin), rpio.LOW);
           }
 
-          gpio.setup(parseInt(splitMessage[1]), gpio.DIR_OUT, function() {
-            gpio.write(parseInt(splitMessage[1]), pinState, function(err) {
-              if (err) console.log(err);
-              //console.log('Written to pin');
+          // Send answer
+          client.publish(out_topic, JSON.stringify(answer));
 
-              // Send answer
-              client.publish(out_topic, JSON.stringify(answer));
-
-            });
-          });
+          // gpio.setup(parseInt(splitMessage[1]), gpio.DIR_OUT, function() {
+          //   gpio.write(parseInt(splitMessage[1]), pinState, function(err) {
+          //     if (err) console.log(err);
+          //     //console.log('Written to pin');
+          //
+          //
+          //
+          //   });
+          // });
 
         }
 
@@ -327,20 +334,23 @@ module.exports = function (app) {
       pi.functions[function_name] = function_definition;
     },
     digitalRead: function(pin, callback) {
-      gpio.setup(parseInt(pin), gpio.DIR_IN, function() {
 
-        gpio.read(parseInt(pin), function(err, value) {
+      // Read
+      rpio.open(parseInt(req.params.pin), rpio.INPUT);
+      value = rpio.read(parseInt(req.params.pin));
+      callback(value);
 
-          callback(value);
-
-        });
-
-      });
+      //   });
+      //
+      // });
     },
     digitalWrite: function(pin, state) {
 
       // Determine state
       var pinState = false;
+
+      // Open for write
+      rpio.open(parseInt(req.params.pin), rpio.OUTPUT, rpio.LOW);
 
       if( typeof(state) === "boolean") {
         pinState = state;
@@ -357,9 +367,8 @@ module.exports = function (app) {
       }
 
       // Write
-      gpio.setup(parseInt(pin), gpio.DIR_OUT, function() {
-        gpio.write(parseInt(pin), pinState);
-      });
+      if (pinState) {rpio.write(parseInt(req.params.pin), rpio.HIGH);}
+      if (!pinState) {rpio.write(parseInt(req.params.pin), rpio.LOW);}
 
     }
   };
