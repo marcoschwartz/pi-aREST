@@ -1,5 +1,6 @@
 // Require
 var gpio = require('rpi-gpio');
+var rpio = require('rpio');
 var RaspiCam = require("raspicam");
 var mqtt = require('mqtt');
 var request = require('request');
@@ -119,22 +120,28 @@ module.exports = function (app) {
 
       if (req.params.command == 'digital') {
 
-        gpio.setup(parseInt(req.params.pin), gpio.DIR_IN, function() {
+        rpio.open(parseInt(req.params.pin), rpio.INPUT);
+        value = rpio.read(parseInt(req.params.pin));
+        console.log('Pin 11 is currently set ' + value);
 
-          gpio.read(parseInt(req.params.pin), function(err, value) {
+        var answer = new Object();
+        answer.id = pi.id;
+        answer.name  = pi.name;
+        answer.hardware  = "rpi";
+        answer.connected = true;
+        answer.return_value = value;
+        res.json(answer);
 
-            var answer = new Object();
-            answer.id = pi.id;
-            answer.name  = pi.name;
-            answer.hardware  = "rpi";
-            answer.connected = true;
-            answer.return_value = value;
-            res.json(answer);
+        // gpio.setup(parseInt(req.params.pin), gpio.DIR_IN, function() {
+        //
+        //   gpio.read(parseInt(req.params.pin), function(err, value) {
+        //
+        //
+        //
+        //     //console.log('The value is ' + value);
+        //   });
 
-            //console.log('The value is ' + value);
-          });
-
-        });
+        // });
 
       }
 
