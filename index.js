@@ -276,7 +276,7 @@ module.exports = function (app) {
           answer.message = 'Pin ' + splitMessage[1] + ' set to ' + splitMessage[2];
 
           // Open for write
-          rpio.open(parseInt(req.params.pin), rpio.OUTPUT, rpio.LOW);
+          rpio.open(parseInt(splitMessage[1]), rpio.OUTPUT, rpio.LOW);
 
           // Determine state
           if (parseInt(splitMessage[2]) == 1) {
