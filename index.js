@@ -335,8 +335,8 @@ module.exports = function (app) {
     digitalRead: function(pin, callback) {
 
       // Read
-      rpio.open(parseInt(req.params.pin), rpio.INPUT);
-      value = rpio.read(parseInt(req.params.pin));
+      rpio.open(parseInt(pin), rpio.INPUT);
+      value = rpio.read(parseInt(pin));
       callback(value);
 
       //   });
@@ -349,7 +349,7 @@ module.exports = function (app) {
       var pinState = false;
 
       // Open for write
-      rpio.open(parseInt(req.params.pin), rpio.OUTPUT, rpio.LOW);
+      rpio.open(parseInt(pin), rpio.OUTPUT, rpio.LOW);
 
       if( typeof(state) === "boolean") {
         pinState = state;
@@ -366,8 +366,8 @@ module.exports = function (app) {
       }
 
       // Write
-      if (pinState) {rpio.write(parseInt(req.params.pin), rpio.HIGH);}
-      if (!pinState) {rpio.write(parseInt(req.params.pin), rpio.LOW);}
+      if (pinState) {rpio.write(parseInt(pin), rpio.HIGH);}
+      if (!pinState) {rpio.write(parseInt(pin), rpio.LOW);}
 
     }
   };
