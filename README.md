@@ -29,7 +29,7 @@ To use the library with your Raspberry Pi board, you will need to have Node.js i
 
 Once this is done, you can install pi-aREST in your project with:
 
-`sudo npm install pi-arest`
+`sudo npm install pi-arest --unsafe-perm`
 
 ## Quick test (Ethernet/WiFi)
 
