@@ -1,6 +1,6 @@
 # pi-aREST
 
-Version 1.2.3
+Version 1.3.1
 
 ## Overview
 
@@ -19,7 +19,7 @@ If you want to know more about aREST, go over to [http://arest.io/](http://arest
 
 ## Supported hardware
 
-The library is at the moment compatible with all the Raspberry Pi boards. It has not be tested yet with the Raspberry Pi 2 & Zero.
+The library is at the moment compatible with all the Raspberry Pi boards, including the Raspberry Pi 3 and Raspberry Pi Zero.
 
 ## Requirements
 
