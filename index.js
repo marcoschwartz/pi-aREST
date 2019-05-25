@@ -197,7 +197,7 @@ module.exports = function (app) {
         remoteHost = host;
       }
       else {
-        remoteHost = '45.55.196.201';
+        remoteHost = '104.248.48.85';
       }
 
       // Connect to MQTT
