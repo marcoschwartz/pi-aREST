@@ -23,6 +23,7 @@ catch(err) {
 var pi = {
   id: '001',
   name: 'my_pi',
+  key: false,
   variables: {},
   functions: {}
 }
@@ -190,7 +191,12 @@ module.exports = function (app) {
     connect: function(host) {
 
       // Generate MQTT clientId
-      var clientId = makeId(6) + pi.id;
+      if (pi.key) {
+        var clientId = pi.id + pi.key;
+      }
+      else {
+        var clientId = makeId(6) + pi.id;
+      }
 
       // Own server?
       if (typeof host !== 'undefined') {
@@ -306,6 +312,9 @@ module.exports = function (app) {
     },
     set_id: function(new_id) {
       pi.id = new_id;
+    },
+    setKey: function(key) {
+      pi.key = key;
     },
     set_mode: function(mode) {
 

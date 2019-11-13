@@ -4,6 +4,7 @@ var app = express();
 var piREST = require('./../../index.js')(app);
 
 piREST.set_id('p5dgwt');
+piREST.setKey('your_key');
 piREST.set_name('pi_cloud');
 piREST.set_mode('bcm');
 

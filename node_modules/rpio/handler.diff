@@ -1,0 +1,144 @@
+diff --git a/lib/rpio.js b/lib/rpio.js
+index 17bf22a..0a34423 100644
+--- a/lib/rpio.js
++++ b/lib/rpio.js
+@@ -404,6 +404,56 @@ function set_pin_pwm(pin)
+ /*
+  * GPIO
+  */
++function default_read_handler(pin)
++{
++	if (module.exports.listenerCount('read') > 1) {
++		module.exports.removeListener('read', default_read_handler);
++		return;
++	}
++	console.log("<-- pin " + pin);
++}
++module.exports.on('read', default_read_handler);
++
++function default_readbuf_handler(pin, len)
++{
++	if (module.exports.listenerCount('readbuf') > 1) {
++		module.exports.removeListener('readbuf', default_readbuf_handler);
++		return;
++	}
++	console.log("<-- pin " + pin + " (" + len + " bytes)");
++}
++module.exports.on('readbuf', default_readbuf_handler);
++
++function default_write_handler(pin, value)
++{
++	if (module.exports.listenerCount('write') > 1) {
++		module.exports.removeListener('write', default_write_handler);
++		return;
++	}
++	console.log("--> pin " + pin + " " + ((value == 0) ? "low" : "high"));
++}
++module.exports.on('write', default_write_handler);
++
++function default_writebuf_handler(pin, len)
++{
++	if (module.exports.listenerCount('writebuf') > 1) {
++		module.exports.removeListener('writebuf', default_writebuf_handler);
++		return;
++	}
++	console.log("--> pin " + pin + " (" + len + " bytes)");
++}
++module.exports.on('writebuf', default_writebuf_handler);
++
++
++function default_handler(type, count)
++{
++	if (module.exports.listenerCount('sleep') > 1) {
++		module.exports.removeListener('sleep', default_sleep_handler);
++		return;
++	}
++	console.log("--- " + type + " " + count);
++}
++module.exports.on('sleep', default_handler);
+ 
+ /*
+  * Default warning handler, if the user registers their own then this one
+@@ -417,7 +467,6 @@ function default_warn_handler(msg)
+ 	}
+ 	warn(msg);
+ }
+-
+ module.exports.on('warn', default_warn_handler);
+ 
+ rpio.prototype.init = function(opts)
+@@ -508,7 +557,10 @@ rpio.prototype.mode = function(pin, mode)
+ 
+ rpio.prototype.read = function(pin)
+ {
+-	return bindcall(binding.gpio_read, pin_to_gpio(pin));
++	if (rpio_options.mock)
++		module.exports.emit('read', pin);
++	else
++		return bindcall(binding.gpio_read, pin_to_gpio(pin));
+ }
+ 
+ rpio.prototype.readbuf = function(pin, buf, len)
+@@ -519,12 +571,18 @@ rpio.prototype.readbuf = function(pin, buf, len)
+ 	if (len > buf.length)
+ 		throw "Buffer not large enough to accommodate request";
+ 
+-	return bindcall3(binding.gpio_readbuf, pin_to_gpio(pin), buf, len);
++	if (rpio_options.mock)
++		module.exports.emit('readbuf', pin, len);
++	else
++		return bindcall3(binding.gpio_readbuf, pin_to_gpio(pin), buf, len);
+ }
+ 
+ rpio.prototype.write = function(pin, value)
+ {
+-	return bindcall2(binding.gpio_write, pin_to_gpio(pin), value);
++	if (rpio_options.mock)
++		module.exports.emit('write', pin, value);
++	else
++		return bindcall2(binding.gpio_write, pin_to_gpio(pin), value);
+ }
+ 
+ rpio.prototype.writebuf = function(pin, buf, len)
+@@ -535,7 +593,10 @@ rpio.prototype.writebuf = function(pin, buf, len)
+ 	if (len > buf.length)
+ 		throw "Buffer not large enough to accommodate request";
+ 
+-	return bindcall3(binding.gpio_writebuf, pin_to_gpio(pin), buf, len);
++	if (rpio_options.mock)
++		module.exports.emit('writebuf', pin, len);
++	else
++		return bindcall3(binding.gpio_writebuf, pin_to_gpio(pin), buf, len);
+ }
+ 
+ rpio.prototype.readpad = function(group)
+@@ -768,17 +829,26 @@ rpio.prototype.spiEnd = function()
+  */
+ rpio.prototype.sleep = function(secs)
+ {
+-	bindcall(binding.rpio_usleep, secs * 1000000);
++	if (rpio_options.mock)
++		module.exports.emit('sleep', 'sleep', secs);
++	else
++		bindcall(binding.rpio_usleep, secs * 1000000);
+ }
+ 
+ rpio.prototype.msleep = function(msecs)
+ {
+-	bindcall(binding.rpio_usleep, msecs * 1000);
++	if (rpio_options.mock)
++		module.exports.emit('sleep', 'msleep', msecs);
++	else
++		bindcall(binding.rpio_usleep, msecs * 1000);
+ }
+ 
+ rpio.prototype.usleep = function(usecs)
+ {
+-	bindcall(binding.rpio_usleep, usecs);
++	if (rpio_options.mock)
++		module.exports.emit('sleep', 'usleep', usecs);
++	else
++		bindcall(binding.rpio_usleep, usecs);
+ }
+ 
+ process.on('exit', function(code) {
