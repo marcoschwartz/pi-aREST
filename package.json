@@ -1,6 +1,6 @@
 {
   "name": "pi-arest",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Implementation of the aREST API for the Raspberry Pi",
   "main": "index.js",
   "scripts": {
