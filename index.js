@@ -24,6 +24,7 @@ var pi = {
   id: '001',
   name: 'my_pi',
   key: false,
+  clientId: '',
   variables: {},
   functions: {},
   client: {}
@@ -199,6 +200,8 @@ module.exports = function (app) {
         var clientId = makeId(6) + pi.id;
       }
 
+      pi.clientId = clientId;
+
       // Own server?
       if (typeof host !== 'undefined') {
         remoteHost = host;
@@ -210,6 +213,7 @@ module.exports = function (app) {
       // Connect to MQTT
       var client  = mqtt.connect({clientId: clientId, host: remoteHost, port: 1883 });
       pi.client = client;
+    
 
       var in_topic = clientId + '_in';
       var out_topic = clientId + '_out';
@@ -383,6 +387,8 @@ module.exports = function (app) {
 
     },
     publish: function(variable, value) {
+
+      var out_topic = pi.clientId + '_out';
 
       pi.client.publish(out_topic, JSON.stringify({
         event_name: variable,
