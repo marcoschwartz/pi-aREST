@@ -25,7 +25,8 @@ var pi = {
   name: 'my_pi',
   key: false,
   variables: {},
-  functions: {}
+  functions: {},
+  client: {}
 }
 
 // Variables
@@ -208,6 +209,8 @@ module.exports = function (app) {
 
       // Connect to MQTT
       var client  = mqtt.connect({clientId: clientId, host: remoteHost, port: 1883 });
+      pi.client = client;
+
       var in_topic = clientId + '_in';
       var out_topic = clientId + '_out';
 
@@ -381,7 +384,7 @@ module.exports = function (app) {
     },
     publish: function(variable, value) {
 
-      client.publish(out_topic, JSON.stringify({
+      pi.client.publish(out_topic, JSON.stringify({
         event_name: variable,
         data: value,
         client_id: pi.id
