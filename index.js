@@ -378,6 +378,15 @@ module.exports = function (app) {
       if (pinState) {rpio.write(parseInt(pin), rpio.HIGH);}
       if (!pinState) {rpio.write(parseInt(pin), rpio.LOW);}
 
+    },
+    publish: function(variable, value) {
+
+      client.publish(out_topic, JSON.stringify({
+        event_name: variable,
+        data: value,
+        client_id: pi.id
+      }));
+
     }
   };
 };
