@@ -238,6 +238,19 @@ module.exports = function (app) {
         splitMessage = incomingMessage.split('/');
         var answer = {};
 
+        if (splitMessage.length == 0) {
+
+          var answer = new Object();
+
+          answer.id = pi.id;
+          answer.name  = pi.name;
+          answer.hardware  = "rpi";
+          answer.connected = true;
+
+          client.publish(out_topic, JSON.stringify(answer));
+        
+        }
+
         if (splitMessage.length == 1) {
 
           var answer = new Object();
