@@ -20,8 +20,8 @@ piREST.connect();
 
 // Publish data on feed temperature, with value 10, every 5 seconds
 setInterval(function () {
-    rest.publish("temperature", temperature);
-});
+    rest.publish("temperature", 10);
+}, 5000);
 
 // Start server
 var server = app.listen(80, function () {
