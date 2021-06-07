@@ -20,7 +20,11 @@ piREST.connect();
 
 // Publish data on feed temperature, with random value, every 5 seconds
 setInterval(function () {
+<<<<<<< HEAD
     piREST.publish("temperature", Math.random() * 40);
+=======
+    rest.publish("temperature", 10);
+>>>>>>> 3401f4fb33e5679fc513353e53d7f5acf3636436
 }, 5000);
 
 // Start server
