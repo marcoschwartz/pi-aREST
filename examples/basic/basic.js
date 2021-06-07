@@ -1,7 +1,7 @@
 // Start
 var express = require('express');
 var app = express();
-var piREST = require('./../../index.js')(app);
+var piREST = require('pi-arest')(app);
 
 // ID should be 6 characters long
 piREST.set_id('34f5eQ');
