@@ -1,7 +1,7 @@
 {
     "name": "pi-arest",
-    "version": "1.6.3",
-    "description": "Implementation of the aREST API for the Raspberry Pi",
+    "version": "2.0.0",
+    "description": "Implementation of the aREST API for the Raspberry Pi with MQTT cloud connectivity",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,7 +11,12 @@
         "url": "https://github.com/marcoschwartz/pi-aREST"
     },
     "keywords": [
-        "Raspberry Pi"
+        "Raspberry Pi",
+        "REST",
+        "API",
+        "MQTT",
+        "IoT",
+        "aREST"
     ],
     "author": "Marco Schwartz <marcolivier.schwartz@gmail.com> (http://www.marcoschwartz.com/)",
     "license": "ISC",
@@ -20,10 +25,14 @@
     },
     "homepage": "https://github.com/marcoschwartz/pi-aREST",
     "dependencies": {
-        "express": "^4.17.1",
-        "mqtt": "",
-        "raspicam": "",
-        "request": "",
-        "rpio": ""
+        "express": "^4.18.2",
+        "mqtt": "^5.3.0",
+        "rpio": "^2.4.2"
+    },
+    "optionalDependencies": {
+        "raspicam": "^0.2.13"
+    },
+    "engines": {
+        "node": ">=14.0.0"
     }
 }

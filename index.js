@@ -1,12 +1,15 @@
+// pi-aREST - REST API for Raspberry Pi with MQTT Cloud Connectivity
+// Version 2.0.0 - MQTT Protocol
+
 // Require
 var rpio = require('rpio');
-var RaspiCam = require("raspicam");
 var mqtt = require('mqtt');
-var request = require('request');
 
 // Try to build camera object
+var camera = null;
 try {
-    var camera = new RaspiCam({
+    var RaspiCam = require("raspicam");
+    camera = new RaspiCam({
         mode: "photo",
         width: 1280,
         height: 720,
@@ -16,406 +19,459 @@ try {
         n: true
     });
 } catch (err) {
-    console.log('Camera module off');
+    // Camera module not available
 }
 
-// Pi aREST class
+// Default MQTT server settings
+const AREST_MQTT_SERVER = 'mqtt.arest.io';
+const AREST_MQTT_PORT = 1883;
+
+// Pi aREST state
 var pi = {
     id: '001',
     name: 'my_pi',
-    key: false,
-    clientId: '',
+    apiKey: null,
     variables: {},
     functions: {},
-    client: {}
+    client: null,
+    connected: false,
+    mqttHost: AREST_MQTT_SERVER,
+    mqttPort: AREST_MQTT_PORT,
+    heartbeatInterval: null,
+    lastPublishTimes: {}  // For rate-limited publishing
+};
+
+// Topics
+function getCommandsTopic() {
+    return 'devices/' + pi.id + '/commands';
 }
 
-// Variables
-var variables = new Object();
+function getResponseTopic() {
+    return 'devices/' + pi.id + '/response';
+}
+
+function getTelemetryTopic() {
+    return 'devices/' + pi.id + '/telemetry';
+}
+
+function getStateTopic() {
+    return 'devices/' + pi.id + '/state';
+}
+
+// Process incoming command
+function processCommand(message) {
+    var command;
+    try {
+        command = JSON.parse(message);
+    } catch (e) {
+        console.log('Invalid JSON command:', message);
+        return;
+    }
+
+    var response = {
+        id: pi.id,
+        name: pi.name,
+        hardware: "rpi",
+        connected: true
+    };
+
+    // Include command_id in response if present
+    if (command.command_id) {
+        response.command_id = command.command_id;
+    }
+
+    var commandType = command.type || command.command_type;
+
+    switch (commandType) {
+        case 'digital_write':
+            var pin = parseInt(command.pin);
+            var value = parseInt(command.value);
+
+            rpio.open(pin, rpio.OUTPUT, rpio.LOW);
+            if (value === 1) {
+                rpio.write(pin, rpio.HIGH);
+            } else {
+                rpio.write(pin, rpio.LOW);
+            }
+
+            response.message = 'Pin ' + pin + ' set to ' + value;
+            response.return_value = value;
+            break;
+
+        case 'digital_read':
+            var pin = parseInt(command.pin);
+
+            rpio.open(pin, rpio.INPUT);
+            var value = rpio.read(pin);
+
+            response.return_value = value;
+            break;
+
+        case 'function':
+            var funcName = command.function || command.name;
+            var params = command.params || command.args || '';
+
+            // Convert params to string if it's an object
+            if (typeof params === 'object') {
+                if (params.value !== undefined) {
+                    params = String(params.value);
+                } else {
+                    params = JSON.stringify(params);
+                }
+            }
+
+            if (pi.functions[funcName]) {
+                // Execute function with callback
+                pi.functions[funcName](params, function(result) {
+                    response.return_value = result;
+                    publishResponse(response);
+                });
+                return; // Don't publish here, will be done in callback
+            } else {
+                response.error = 'Function not found: ' + funcName;
+            }
+            break;
+
+        case 'get_variable':
+            var varName = command.variable || command.name;
+
+            if (pi.variables[varName] !== undefined) {
+                response[varName] = pi.variables[varName];
+                response.return_value = pi.variables[varName];
+            } else {
+                response.error = 'Variable not found: ' + varName;
+            }
+            break;
+
+        case 'get_info':
+            response.variables = pi.variables;
+            break;
+
+        default:
+            response.error = 'Unknown command type: ' + commandType;
+    }
+
+    publishResponse(response);
+}
+
+// Publish response to MQTT
+function publishResponse(response) {
+    if (pi.client && pi.connected) {
+        pi.client.publish(getResponseTopic(), JSON.stringify(response));
+    }
+}
+
+// Publish state/heartbeat
+function publishState() {
+    if (pi.client && pi.connected) {
+        var state = {
+            id: pi.id,
+            name: pi.name,
+            hardware: "rpi",
+            connected: true,
+            uptime: process.uptime(),
+            timestamp: Date.now()
+        };
+        pi.client.publish(getStateTopic(), JSON.stringify(state));
+    }
+}
 
 // Exports
 module.exports = function(app) {
 
-    // All
-    app.get('/', function(req, res) {
-
-        var answer = new Object();
-        answer.id = pi.id;
-        answer.name = pi.name;
-        answer.hardware = "rpi";
-        answer.variables = pi.variables;
-        answer.connected = true;
-
-        res.json(answer);
-    });
-
-    // Variables
-    app.get('/:variable', function(req, res) {
-
-        var variable = req.params.variable;
-        var answer = new Object();
-
-        answer.id = pi.id;
-        answer.name = pi.name;
-        answer.hardware = "rpi";
-        answer.connected = true;
-
-        // Variable ?
-        if (pi.variables[variable]) {
-            answer[variable] = pi.variables[variable];
+    // HTTP Routes (local access)
+    if (app) {
+        // Root - device info
+        app.get('/', function(req, res) {
+            var answer = {
+                id: pi.id,
+                name: pi.name,
+                hardware: "rpi",
+                variables: pi.variables,
+                connected: pi.connected
+            };
             res.json(answer);
-        }
-
-        // Function ?
-        else if (pi.functions[variable]) {
-
-            // Parameters ?
-            if (req.query.params) {
-
-                // Execute function
-                pi.functions[variable](req.query.params, function(result) {
-                    answer.return_value = result;
-                    res.json(answer);
-                });
-
-            } else {
-
-                // Execute function
-                pi.functions[variable](function(result) {
-                    answer.return_value = result;
-                    res.json(answer);
-                });
-
-            }
-
-        } else {
-            res.json(answer);
-        }
-
-    });
-
-    // Camera snapshot
-    app.get('/camera/snapshot', function(req, res) {
-
-        var answer = new Object();
-
-        camera.start({ rotation: 180 });
-
-        camera.once("read", function(err, timestamp, filename) {
-            console.log("Picture recorded");
-            camera.stop();
         });
 
-        answer.id = pi.id;
-        answer.name = pi.name;
-        answer.hardware = "rpi";
-        answer.connected = true;
-        answer.message = 'Picture saved';
-        res.json(answer);
+        // Variables and functions
+        app.get('/:variable', function(req, res) {
+            var variable = req.params.variable;
+            var answer = {
+                id: pi.id,
+                name: pi.name,
+                hardware: "rpi",
+                connected: pi.connected
+            };
 
-    });
+            // Variable?
+            if (pi.variables[variable] !== undefined) {
+                answer[variable] = pi.variables[variable];
+                res.json(answer);
+            }
+            // Function?
+            else if (pi.functions[variable]) {
+                var params = req.query.params || '';
 
-    // Digital read
-    app.get('/:command/:pin', function(req, res) {
-
-        if (req.params.command == 'digital') {
-
-            // Read
-            rpio.open(parseInt(req.params.pin), rpio.INPUT);
-            value = rpio.read(parseInt(req.params.pin));
-
-            // Send answer
-            var answer = new Object();
-            answer.id = pi.id;
-            answer.name = pi.name;
-            answer.hardware = "rpi";
-            answer.connected = true;
-            answer.return_value = value;
-            res.json(answer);
-
-            // gpio.setup(parseInt(req.params.pin), gpio.DIR_IN, function() {
-            //
-            //   gpio.read(parseInt(req.params.pin), function(err, value) {
-            //
-            //
-            //
-            //     //console.log('The value is ' + value);
-            //   });
-
-            // });
-
-        }
-
-    });
-
-    // Digital write
-    app.get('/digital/:pin/:state', function(req, res) {
-
-        var answer = new Object();
-
-        answer.id = pi.id;
-        answer.name = pi.name;
-        answer.hardware = "rpi";
-        answer.connected = true;
-
-        answer.message = 'Pin ' + req.params.pin + ' set to ' + req.params.state;
-
-        // Open for write
-        rpio.open(parseInt(req.params.pin), rpio.OUTPUT, rpio.LOW);
-
-        // Determine state & write
-        if (parseInt(req.params.state) == 1) {
-            rpio.write(parseInt(req.params.pin), rpio.HIGH);
-        }
-        if (parseInt(req.params.state) == 0) {
-            rpio.write(parseInt(req.params.pin), rpio.LOW);
-        }
-
-        // Send answer
-        res.json(answer);
-
-        // gpio.setup(parseInt(req.params.pin), gpio.DIR_OUT, function() {
-        //   gpio.write(parseInt(req.params.pin), pinState, function(err) {
-        //     if (err) console.log(err);
-        //     console.log('Written to pin');
-        //
-        //     // Send answer
-        //     res.json(answer);
-        //
-        //   });
-        // });
-
-    });
-
-    return {
-        connect: function(host) {
-
-            // Generate MQTT clientId
-            if (pi.key) {
-                var clientId = pi.id + pi.key;
+                pi.functions[variable](params, function(result) {
+                    answer.return_value = result;
+                    res.json(answer);
+                });
             } else {
-                var clientId = makeId(6) + pi.id;
+                res.json(answer);
+            }
+        });
+
+        // Camera snapshot
+        app.get('/camera/snapshot', function(req, res) {
+            var answer = {
+                id: pi.id,
+                name: pi.name,
+                hardware: "rpi",
+                connected: pi.connected
+            };
+
+            if (camera) {
+                camera.start({ rotation: 180 });
+                camera.once("read", function(err, timestamp, filename) {
+                    console.log("Picture recorded");
+                    camera.stop();
+                });
+                answer.message = 'Picture saved';
+            } else {
+                answer.error = 'Camera not available';
+            }
+            res.json(answer);
+        });
+
+        // Digital read
+        app.get('/digital/:pin', function(req, res) {
+            var pin = parseInt(req.params.pin);
+
+            rpio.open(pin, rpio.INPUT);
+            var value = rpio.read(pin);
+
+            var answer = {
+                id: pi.id,
+                name: pi.name,
+                hardware: "rpi",
+                connected: pi.connected,
+                return_value: value
+            };
+            res.json(answer);
+        });
+
+        // Digital write
+        app.get('/digital/:pin/:state', function(req, res) {
+            var pin = parseInt(req.params.pin);
+            var state = parseInt(req.params.state);
+
+            rpio.open(pin, rpio.OUTPUT, rpio.LOW);
+            if (state === 1) {
+                rpio.write(pin, rpio.HIGH);
+            } else {
+                rpio.write(pin, rpio.LOW);
             }
 
-            pi.clientId = clientId;
+            var answer = {
+                id: pi.id,
+                name: pi.name,
+                hardware: "rpi",
+                connected: pi.connected,
+                message: 'Pin ' + pin + ' set to ' + state
+            };
+            res.json(answer);
+        });
+    }
 
-            // Own server?
-            // if (typeof host !== 'undefined') {
-            //   remoteHost = host;
-            // }
-            // else {
-            //   remoteHost = '164.90.147.20';
-            // }
+    return {
+        // Connect to MQTT broker
+        connect: function(host, port) {
+            // Allow custom server
+            if (host) {
+                pi.mqttHost = host;
+            }
+            if (port) {
+                pi.mqttPort = port;
+            }
 
-            // Set host
-            remoteHost = 'mqtt.arest.io';
+            // Build MQTT connection options
+            var options = {
+                clientId: 'pi_' + pi.id + '_' + Date.now(),
+                host: pi.mqttHost,
+                port: pi.mqttPort,
+                clean: true,
+                reconnectPeriod: 5000
+            };
 
-            // Connect to MQTT
-            var client = mqtt.connect({ clientId: clientId, host: remoteHost, port: 1883 });
+            // Add authentication if API key is set
+            if (pi.apiKey) {
+                options.username = pi.id;
+                options.password = pi.apiKey;
+            }
+
+            console.log('Connecting to MQTT broker at ' + pi.mqttHost + ':' + pi.mqttPort);
+
+            // Connect to MQTT broker
+            var client = mqtt.connect(options);
             pi.client = client;
 
-
-            var in_topic = clientId + '_in';
-            var out_topic = clientId + '_out';
-
-            // If connected
+            // On connect
             client.on('connect', function() {
+                console.log('Connected to aREST cloud');
+                pi.connected = true;
 
-                console.log('Connected to aREST.io');
-
-                // Subscribe
-                client.subscribe(in_topic);
-
-            });
-
-            // Handle messages
-            client.on('message', function(topic, message) {
-
-                // Message is Buffer
-                var incomingMessage = message.toString();
-
-                // Process
-                splitMessage = incomingMessage.split('/');
-                var answer = {};
-
-                if (splitMessage.length == 0) {
-
-                    var answer = new Object();
-
-                    answer.id = pi.id;
-                    answer.name = pi.name;
-                    answer.hardware = "rpi";
-                    answer.connected = true;
-
-                    client.publish(out_topic, JSON.stringify(answer));
-
-                }
-
-                if (splitMessage.length == 1) {
-
-                    var answer = new Object();
-
-                    answer.id = pi.id;
-                    answer.name = pi.name;
-                    answer.hardware = "rpi";
-                    answer.connected = true;
-
-                    // Variable ?
-                    if (pi.variables[splitMessage[0]]) {
-                        answer[splitMessage[0]] = pi.variables[splitMessage[0]];
-                        client.publish(out_topic, JSON.stringify(answer));
+                // Subscribe to commands topic
+                client.subscribe(getCommandsTopic(), function(err) {
+                    if (err) {
+                        console.log('Subscribe error:', err);
                     } else {
-                        client.publish(out_topic, JSON.stringify(answer));
+                        console.log('Subscribed to: ' + getCommandsTopic());
                     }
+                });
 
+                // Send initial state
+                publishState();
+
+                // Start heartbeat (every 30 seconds)
+                if (pi.heartbeatInterval) {
+                    clearInterval(pi.heartbeatInterval);
                 }
-
-                if (splitMessage.length == 2) {
-
-                    // Read
-                    rpio.open(parseInt(splitMessage[1]), rpio.INPUT);
-                    value = rpio.read(parseInt(splitMessage[1]));
-
-                    answer.id = pi.id;
-                    answer.name = pi.name;
-                    answer.hardware = "rpi";
-                    answer.connected = true;
-                    answer.return_value = value;
-
-                    client.publish(out_topic, JSON.stringify(answer));
-                    //
-                    //   });
-                    //
-                    // });
-
-                }
-
-                if (splitMessage.length == 3) {
-
-                    answer.id = pi.id;
-                    answer.name = pi.name;
-                    answer.hardware = "rpi";
-                    answer.connected = true;
-
-                    answer.message = 'Pin ' + splitMessage[1] + ' set to ' + splitMessage[2];
-
-                    // Open for write
-                    rpio.open(parseInt(splitMessage[1]), rpio.OUTPUT, rpio.LOW);
-
-                    // Determine state
-                    if (parseInt(splitMessage[2]) == 1) {
-                        rpio.write(parseInt(splitMessage[1]), rpio.HIGH);
-                    }
-                    if (parseInt(splitMessage[2]) == 0) {
-                        rpio.write(parseInt(splitMessage[1]), rpio.LOW);
-                    }
-
-                    // Send answer
-                    client.publish(out_topic, JSON.stringify(answer));
-
-                    // gpio.setup(parseInt(splitMessage[1]), gpio.DIR_OUT, function() {
-                    //   gpio.write(parseInt(splitMessage[1]), pinState, function(err) {
-                    //     if (err) console.log(err);
-                    //     //console.log('Written to pin');
-                    //
-                    //
-                    //
-                    //   });
-                    // });
-
-                }
-
+                pi.heartbeatInterval = setInterval(publishState, 30000);
             });
 
+            // On disconnect
+            client.on('close', function() {
+                console.log('Disconnected from MQTT broker');
+                pi.connected = false;
+            });
+
+            // On error
+            client.on('error', function(err) {
+                console.log('MQTT error:', err.message);
+            });
+
+            // On reconnect
+            client.on('reconnect', function() {
+                console.log('Reconnecting to MQTT broker...');
+            });
+
+            // Handle incoming messages
+            client.on('message', function(topic, message) {
+                var messageStr = message.toString();
+                console.log('Received command:', messageStr);
+                processCommand(messageStr);
+            });
         },
+
+        // Set device ID
         set_id: function(new_id) {
             pi.id = new_id;
         },
+
+        // Set API key for authentication
         setKey: function(key) {
-            pi.key = key;
+            pi.apiKey = key;
         },
+
+        // Set custom MQTT server
+        setServer: function(host, port) {
+            pi.mqttHost = host || AREST_MQTT_SERVER;
+            pi.mqttPort = port || AREST_MQTT_PORT;
+        },
+
+        // Set pin mode (bcm/gpio or physical/rpi)
         set_mode: function(mode) {
-
-            if (mode == 'gpio') {
+            if (mode === 'gpio' || mode === 'bcm') {
                 rpio.init({ mapping: 'gpio' });
-            }
-            if (mode == 'bcm') {
-                rpio.init({ mapping: 'gpio' });
-            }
-            if (mode == 'rpi') {
+            } else if (mode === 'rpi' || mode === 'physical') {
                 rpio.init({ mapping: 'physical' });
             }
-            if (mode == 'physical') {
-                rpio.init({ mapping: 'physical' });
-            }
-
         },
+
+        // Set device name
         set_name: function(new_name) {
             pi.name = new_name;
         },
+
+        // Expose a variable
         variable: function(variable_name, variable_value) {
             pi.variables[variable_name] = variable_value;
         },
+
+        // Update a variable value
+        setVariable: function(variable_name, variable_value) {
+            pi.variables[variable_name] = variable_value;
+        },
+
+        // Expose a function
         function: function(function_name, function_definition) {
             pi.functions[function_name] = function_definition;
         },
+
+        // Digital read
         digitalRead: function(pin, callback) {
-
-            // Read
             rpio.open(parseInt(pin), rpio.INPUT);
-            value = rpio.read(parseInt(pin));
-            callback(value);
-
-            //   });
-            //
-            // });
+            var value = rpio.read(parseInt(pin));
+            if (callback) {
+                callback(value);
+            }
+            return value;
         },
-        digitalWrite: function(pin, state) {
 
-            // Determine state
+        // Digital write
+        digitalWrite: function(pin, state) {
             var pinState = false;
 
-            // Open for write
             rpio.open(parseInt(pin), rpio.OUTPUT, rpio.LOW);
 
             if (typeof(state) === "boolean") {
                 pinState = state;
             } else {
-
-                if (parseInt(state) == 1) {
-                    pinState = true;
-                }
-                if (parseInt(state) == 0) {
-                    pinState = false;
-                }
-
+                pinState = (parseInt(state) === 1);
             }
 
-            // Write
-            if (pinState) { rpio.write(parseInt(pin), rpio.HIGH); }
-            if (!pinState) { rpio.write(parseInt(pin), rpio.LOW); }
-
+            if (pinState) {
+                rpio.write(parseInt(pin), rpio.HIGH);
+            } else {
+                rpio.write(parseInt(pin), rpio.LOW);
+            }
         },
-        publish: function(variable, value) {
 
-            var out_topic = pi.clientId + '_out';
+        // Publish telemetry data
+        publish: function(variable, value, interval) {
+            if (!pi.client || !pi.connected) {
+                return;
+            }
 
-            pi.client.publish(out_topic, JSON.stringify({
-                event_name: variable,
-                data: value,
-                client_id: pi.id
-            }));
+            // Rate limiting
+            if (interval) {
+                var now = Date.now();
+                var lastTime = pi.lastPublishTimes[variable] || 0;
+                if (now - lastTime < interval) {
+                    return;
+                }
+                pi.lastPublishTimes[variable] = now;
+            }
 
+            var telemetry = {
+                id: pi.id,
+                name: pi.name,
+                variable: variable,
+                value: value,
+                timestamp: Date.now()
+            };
+
+            pi.client.publish(getTelemetryTopic(), JSON.stringify(telemetry));
+        },
+
+        // Check if connected
+        isConnected: function() {
+            return pi.connected;
+        },
+
+        // Get MQTT client (for advanced usage)
+        getClient: function() {
+            return pi.client;
         }
     };
 };
-
-function makeId(length) {
-    var text = "";
-    var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (var i = 0; i < length; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    return text;
-}
